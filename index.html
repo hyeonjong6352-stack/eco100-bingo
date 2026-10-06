@@ -223,7 +223,12 @@ button.cell:active { transform: scale(.96); }
 .art { width: 53%; aspect-ratio: 3 / 2; object-fit: contain; mix-blend-mode: multiply; }
 .band { position: relative; display: block; height: 19px; height: clamp(19px, 10.5cqw, 32px); border-radius: 999px; background: var(--band); overflow: hidden; }
 .band-fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, #9BD886, var(--leaf-bright)); transition: width .8s cubic-bezier(.2, .8, .2, 1); }
-.band-text { position: relative; display: grid; place-items: center; height: 100%; font-family: var(--font-title); font-size: 11.5px; font-size: clamp(11.5px, 6cqw, 16px); line-height: 1; color: var(--forest); font-variant-numeric: tabular-nums; }
+.team-pill {
+  flex: none; font-style: normal; padding: 0 5px; padding: 0 2.6cqw; border-radius: 999px; line-height: 1.45;
+  font-size: 10px; font-size: clamp(10px, 5.4cqw, 14px); letter-spacing: -.02em;
+  color: #6B4700; background: linear-gradient(#FFE98A, #FFC933); box-shadow: 0 0 0 1px rgba(168, 116, 0, .25);
+}
+.band-text { position: relative; display: flex; align-items: center; justify-content: center; gap: 4px; gap: 2.2cqw; height: 100%; white-space: nowrap; font-family: var(--font-title); font-size: 11.5px; font-size: clamp(11.5px, 6cqw, 16px); line-height: 1; color: var(--forest); font-variant-numeric: tabular-nums; }
 .cell.is-done .band-text { color: var(--white); }
 
 /* 도장 자리와 도장 */
@@ -434,8 +439,8 @@ button.cell:active { transform: scale(.96); }
         <img class="sprig sprig-r" src="img/sprig-right.webp" alt="">
         <ol class="steps">
           <li data-n="1"><span>9가지 미션을 확인하고, 100일 동안 다 함께 실천해요! 도장판은 팀 전체가 함께 채우는 한 장이에요.</span></li>
-          <li data-n="2"><span><b>개인 과제</b>(목표 3회)는 직접 실천한 사람이 칸을 눌러 사진과 내용을 올려요. 인증 1건마다 올린 사람에게 <b>5점</b>!</span></li>
-          <li data-n="3"><span><b>팀 과제</b>(테두리가 반짝이는 칸, 목표 1회)는 팀원 중 한 명이 팀을 대표해 올려요. 달성하면 참가자 모두 <b>10점</b>!</span></li>
+          <li data-n="2"><span><b>개인 과제</b>(목표 5회)는 직접 실천한 사람이 칸을 눌러 사진과 내용을 올려요. 인증 1건마다 올린 사람에게 <b>5점</b>!</span></li>
+          <li data-n="3"><span><b>팀 과제</b>('팀과제' 표시와 테두리가 반짝이는 칸, 목표 1회)는 팀원 중 한 명이 팀을 대표해 올려요. 달성하면 참가자 모두 <b>10점</b>!</span></li>
           <li data-n="4"><span>목표 횟수를 채운 칸에는 <b>그린품질도장</b>이 찍히고, 가로·세로·대각선 중 한 줄 이상 완성하면 챌린지 성공!</span></li>
           <li data-n="5"><span>개인 누적 점수 <b>1·2·3위는 시상</b>이 있어요! '개인 랭킹'을 누르면 팀 전원의 점수를 볼 수 있어요.</span></li>
         </ol>
@@ -522,28 +527,28 @@ button.cell:active { transform: scale(.96); }
 
   const SUPABASE_SDK = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
   const PEOPLE = [
-    { id: "p1", label: "참가자1", name: "나00" },
-    { id: "p2", label: "참가자2", name: "조00" },
-    { id: "p3", label: "참가자3", name: "이00" },
-    { id: "p4", label: "참가자4", name: "신00" },
-    { id: "p5", label: "참가자5", name: "강00" },
-    { id: "p6", label: "참가자6", name: "0주0" },
-    { id: "p7", label: "참가자7", name: "00철" },
-    { id: "p8", label: "참가자8", name: "00섬" },
-    { id: "p9", label: "참가자9", name: "유00" }
+    { id: "p1", label: "참가자", name: "나부장" },
+    { id: "p2", label: "참가자", name: "옥대리" },
+    { id: "p3", label: "참가자", name: "수대리" },
+    { id: "p4", label: "참가자", name: "진대리" },
+    { id: "p5", label: "참가자", name: "강대리" },
+    { id: "p6", label: "참가자", name: "주주임" },
+    { id: "p7", label: "참가자", name: "철대리" },
+    { id: "p8", label: "참가자", name: "섬대리" },
+    { id: "p9", label: "참가자", name: "종인턴" }
   ];
   const PEOPLE_BY_ID = new Map(PEOPLE.map((p) => [p.id, p]));
   /* team: 팀 과제. 팀원 중 한 명이 팀을 대표해 goal회 인증하면 달성되고, 달성하면 참가자 모두 TEAM_POINTS점.
      나머지는 개인 과제. 직접 실천한 사람이 올리고, 인증 1건마다 올린 사람에게 INDIV_POINTS점. */
   const MISSIONS = [
     { n: 1, name: "팀 전원 개인 텀블러 사용", goal: 1, team: true, eg: "예) 오늘 팀원 모두 개인 텀블러를 사용했어요. (단체 사진)" },
-    { n: 2, name: "이면지 재활용함 활용", goal: 3, eg: "예) 이면지 재활용함의 종이를 가져와 회의 메모에 썼어요." },
-    { n: 3, name: "폐건전지 수거함 활용", goal: 3, eg: "예) 집에서 다 쓴 건전지를 가져와 수거함에 넣었어요." },
-    { n: 4, name: "다회용 공용 비품함 활용", goal: 3, eg: "예) 일회용품 대신 공용 비품함의 다회용 컵과 수저를 썼어요." },
+    { n: 2, name: "이면지 재활용함 활용", goal: 5, eg: "예) 이면지 재활용함의 종이를 가져와 회의 메모에 썼어요." },
+    { n: 3, name: "폐건전지 수거함 활용", goal: 5, eg: "예) 집에서 다 쓴 건전지를 가져와 수거함에 넣었어요." },
+    { n: 4, name: "다회용 공용 비품함 활용", goal: 5, eg: "예) 일회용품 대신 공용 비품함의 다회용 컵과 수저를 썼어요." },
     { n: 5, name: "공용 냉장고 이름표 부착 및 유통기한 점검", goal: 1, team: true, eg: "예) 팀이 함께 이름표를 붙이고 유통기한이 지난 음식을 정리했어요." },
     { n: 6, name: "일회용품 없는 회의", goal: 1, team: true, eg: "예) 주간회의를 종이컵과 생수병 없이 진행했어요." },
-    { n: 7, name: "점심시간 불필요한 전력 차단", goal: 3, eg: "예) 점심시간에 내 모니터와 자리 조명을 끄고 나갔어요." },
-    { n: 8, name: "공용 손수건·행주 활용", goal: 3, eg: "예) 휴지 대신 탕비실의 공용 손수건과 행주를 썼어요." },
+    { n: 7, name: "점심시간 불필요한 전력 차단", goal: 5, eg: "예) 점심시간에 내 모니터와 자리 조명을 끄고 나갔어요." },
+    { n: 8, name: "공용 손수건·행주 활용", goal: 5, eg: "예) 휴지 대신 탕비실의 공용 손수건과 행주를 썼어요." },
     { n: 9, name: "점심 플로깅(줍깅)", goal: 1, team: true, eg: "예) 팀이 함께 점심시간에 건물 주변을 걸으며 쓰레기를 주웠어요." }
   ];
   const LINES = [
@@ -694,12 +699,16 @@ button.cell:active { transform: scale(.96); }
     slot.classList.toggle("is-done", isDone);
     slot.classList.toggle("thunk", !!animate);
     el.querySelector(".band-fill").style.width = Math.round(Math.min(1, c / m.goal) * 100) + "%";
-    el.querySelector(".band-text").textContent = m.team
-      ? (isDone ? (long ? "팀 과제 달성! 도장 완료" : "팀 과제 완료!") : (long ? "팀 과제 · 목표 " + m.goal + "회 중 " + c + "회 인증" : "팀 " + c + " / " + m.goal + "회"))
-      : isDone
-        ? (long ? "목표 " + m.goal + "회 달성! 도장 완료" : "도장 완료!")
-        : (long ? "목표 " + m.goal + "회 중 " + c + "회 인증" : c + " / " + m.goal + "회");
+    setBand(el, m, isDone
+      ? (long ? "목표 " + m.goal + "회 달성! 도장 완료" : m.team ? "완료!" : "도장 완료!")
+      : (long ? "목표 " + m.goal + "회 중 " + c + "회 인증" : c + " / " + m.goal + "회"));
     if (animate) setTimeout(() => fx.burst(slot, 20), 260);
+  }
+  /* 진행 막대 글자. 팀 과제는 앞에 '팀과제' 꼬리표를 붙인다(칸 안의 그림·제목을 가리지 않는 자리). */
+  function setBand(el, m, text) {
+    const parts = [document.createTextNode(text)];
+    if (m.team) { const pill = document.createElement("i"); pill.className = "team-pill"; pill.textContent = "팀과제"; parts.unshift(pill); }
+    el.querySelector(".band-text").replaceChildren(...parts);
   }
 
   function buildBoard() {
@@ -807,7 +816,7 @@ button.cell:active { transform: scale(.96); }
       const btn = $("cell-" + m.n);
       btn.classList.toggle("on-line", onLine.has(m.n));
       updateCell(btn, m, c, boardVisible && state.fresh.has(m.n), false);
-      if (onLine.has(m.n)) btn.querySelector(".band-text").textContent = "빙고!";
+      if (onLine.has(m.n)) setBand(btn, m, "빙고!");
       btn.setAttribute("aria-label", "미션 " + m.n + ", " + (m.team ? "팀 과제, " : "") + m.name + ", " + (done.has(m.n) ? "도장 완료" : "목표 " + m.goal + "회 중 " + c + "회"));
       btn.classList.remove("cheer");
     }
