@@ -114,6 +114,41 @@ img { display: block; }
 .person-name { font-family: var(--font-title); font-size: clamp(19px, 15cqw, 32px); line-height: 1.15; }
 .person-state { min-height: 1.4em; font-family: var(--font-title); font-size: clamp(11.5px, 7.4cqw, 16px); line-height: 1.4; color: var(--forest); font-variant-numeric: tabular-nums; }
 .pick-hint { padding: 10px 8px 2px; font-size: .875rem; color: var(--muted); text-align: center; }
+
+/* ── 개인 랭킹 ── */
+.rank-box { margin-top: 32px; }
+.rank-rule { margin: -6px 2px 10px; font-size: .8125rem; color: var(--muted); }
+.rank-rule b { font-weight: 400; font-family: var(--font-title); color: var(--forest); }
+.rank { display: flex; flex-direction: column; gap: 6px; }
+.rank-row {
+  display: grid; grid-template-columns: 50px minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  padding: 7px 12px 7px 6px; border-radius: 14px; background: var(--paper); border: 1px solid var(--hair);
+  animation: view-in .4s ease both; animation-delay: calc(var(--i) * 60ms);
+}
+.rank-row.r1 { background: linear-gradient(90deg, #FFF4C2, var(--paper) 75%); border-color: #F1D877; }
+.rank-row.r2 { background: linear-gradient(90deg, #EEF1F5, var(--paper) 75%); border-color: #D6DCE3; }
+.rank-row.r3 { background: linear-gradient(90deg, #FBE7D8, var(--paper) 75%); border-color: #EBC6A8; }
+.rank-row.is-me { box-shadow: 0 0 0 2px var(--leaf-bright) inset; }
+.rank-pos { display: grid; place-items: center; height: 34px; font-family: var(--font-title); font-size: 1.15rem; color: var(--muted); }
+.crown { width: 48px; height: auto; overflow: visible; }
+.crown .c-body { fill: var(--c); stroke: var(--c-edge); stroke-width: 1.4; stroke-linejoin: round; }
+.crown .c-band { fill: var(--c-band); stroke: var(--c-edge); stroke-width: 1.4; stroke-linejoin: round; }
+.crown .c-gem { fill: var(--white); stroke: var(--c-edge); stroke-width: 1.2; }
+.crown .c-shine { fill: none; stroke: var(--white); stroke-width: 1.6; stroke-linecap: round; opacity: .7; }
+.crown text { font-family: var(--font-title); font-size: 10px; fill: var(--c-edge); text-anchor: middle; }
+.crown.gold { --c: #FFD43B; --c-band: #F5B800; --c-edge: #8F6200; }
+.crown.silver { --c: #E3E8EE; --c-band: #C3CCD6; --c-edge: #5F6C7A; }
+.crown.bronze { --c: #EDAE7E; --c-band: #D88A55; --c-edge: #7E4219; }
+.r1 .crown { animation: crown-bob 2.8s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes crown-bob { 0%, 70%, 100% { transform: none; } 80% { transform: rotate(-8deg) scale(1.1); } 90% { transform: rotate(6deg) scale(1.05); } }
+.rank-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rank-who b { font-weight: 400; font-family: var(--font-title); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-who .who-tag { flex: none; font-size: .75rem; }
+.rank-me-tag { flex: none; font-family: var(--font-title); font-size: .75rem; color: var(--leaf); }
+.rank-score { text-align: right; font-family: var(--font-title); color: var(--forest); white-space: nowrap; line-height: 1.15; }
+.rank-score b { font-weight: 400; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.rank-score small { display: block; font-family: var(--font-body); font-size: .75rem; color: var(--muted); }
+.rank-me { margin-top: 10px; padding: 8px 12px; border-radius: 12px; background: var(--band); color: var(--forest); font-size: .9375rem; }
 .foot-zone.solo { grid-template-columns: minmax(0, 1fr); }
 
 .grid-wrap { position: relative; }
@@ -157,6 +192,17 @@ button.cell:active { transform: scale(.96); }
 .cell.on-line .band-fill { background: linear-gradient(90deg, #FFE98A, #FFB300); }
 .cell.on-line.is-done .band-text { color: #5B3A00; }
 @keyframes cheer { 0% { transform: none; } 40% { transform: translateY(-10px) scale(1.06) rotate(-2deg); } 100% { transform: none; } }
+/* 팀 과제 표시: 칸 오른쪽 위의 노란 리본 */
+.cell.is-team { background: linear-gradient(#FFFBE6, var(--card) 45%); border-color: #F1DC86; }
+.cell.is-team::before {
+  content: "팀 과제"; position: absolute; top: -7px; right: 6px; z-index: 2; padding: 1px 7px 2px; border-radius: 999px;
+  font-family: var(--font-title); font-size: 10px; font-size: clamp(10px, 6.4cqw, 14px); line-height: 1.3;
+  color: #6B4700; background: linear-gradient(#FFE98A, #FFC933); box-shadow: 0 0 0 1.5px var(--card), 0 2px 3px rgba(120, 80, 0, .25);
+}
+.mission-rule { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--band); color: var(--forest); font-size: .9375rem; }
+.mission-rule.team { background: #FFF4C2; color: #5B4200; }
+.mission-rule b { flex: none; font-weight: 400; font-family: var(--font-title); padding: 0 9px; border-radius: 999px; background: var(--forest); color: var(--white); font-size: .8125rem; line-height: 1.6; }
+.mission-rule.team b { background: linear-gradient(#FFE98A, #FFC933); color: #6B4700; }
 .cell-head { display: flow-root; flex: 1; }
 .badge { float: left; width: 24px; width: 21cqw; height: auto; margin-right: 3px; margin-right: 2.6cqw; mix-blend-mode: multiply; }
 .cell-name { display: block; font-family: var(--font-title); font-size: 11.5px; font-size: clamp(11.5px, 7.4cqw, 21px); line-height: 1.24; padding-top: .15em; }
@@ -329,7 +375,7 @@ button.cell:active { transform: scale(.96); }
         </section>
         <p class="notice" id="pick-notice" hidden></p>
         <ol class="people" id="people" aria-label="참가자 9명"></ol>
-        <p class="pick-hint">도장판은 모두가 함께 채우는 한 장이에요. 내 이름을 고르면 내가 올린 인증에 이름이 표시됩니다. 이 기기에서는 다음부터 바로 도장판이 열려요.</p>
+        <p class="pick-hint">도장판은 팀 전체가 함께 채우고, 점수는 개인별로 쌓여요. 내 이름을 고르면 내가 올린 인증에 이름이 표시됩니다. 이 기기에서는 다음부터 바로 도장판이 열려요.</p>
       </div>
     </div>
     <div class="foot-zone solo">
@@ -356,6 +402,14 @@ button.cell:active { transform: scale(.96); }
           <svg class="sparks" id="sparks" aria-hidden="true"></svg>
         </div>
       </div>
+
+      <section class="box rank-box" aria-labelledby="rank-title">
+        <h2 class="tab" id="rank-title">개인 랭킹</h2>
+        <p class="rank-rule">개인 과제 인증 1건 <b>5점</b> · 팀 과제 달성 시 참가자 모두 <b>10점</b> · 1·2·3위 시상</p>
+        <ol class="rank" id="rank" aria-live="polite"></ol>
+        <p class="empty" id="rank-empty" hidden>아직 점수가 없습니다. 첫 인증을 올리면 5점!</p>
+        <p class="rank-me" id="rank-me" hidden></p>
+      </section>
     </div>
 
     <div class="foot-zone">
@@ -364,9 +418,11 @@ button.cell:active { transform: scale(.96); }
         <img class="sprig sprig-l" src="img/sprig-left.webp" alt="">
         <img class="sprig sprig-r" src="img/sprig-right.webp" alt="">
         <ol class="steps">
-          <li data-n="1"><span>9가지 미션을 확인하고, 100일 동안 다 함께 실천해요! 도장판은 모두가 함께 채우는 한 장이에요.</span></li>
-          <li data-n="2"><span>미션을 달성하면 해당 칸을 눌러 사진과 내용을 올려주세요. 목표 횟수를 채우면 <b>그린품질도장</b>이 찍혀요!</span></li>
-          <li data-n="3"><span>가로·세로·대각선 중 한 줄 이상 완성하면 챌린지 성공!</span></li>
+          <li data-n="1"><span>9가지 미션을 확인하고, 100일 동안 다 함께 실천해요! 도장판은 팀 전체가 함께 채우는 한 장이에요.</span></li>
+          <li data-n="2"><span><b>개인 과제</b>(목표 3회)는 직접 실천한 사람이 칸을 눌러 사진과 내용을 올려요. 인증 1건마다 올린 사람에게 <b>5점</b>!</span></li>
+          <li data-n="3"><span><b>팀 과제</b>(노란 '팀 과제' 표시, 목표 1회)는 팀원 중 한 명이 팀을 대표해 올려요. 달성하면 참가자 모두 <b>10점</b>!</span></li>
+          <li data-n="4"><span>목표 횟수를 채운 칸에는 <b>그린품질도장</b>이 찍히고, 가로·세로·대각선 중 한 줄 이상 완성하면 챌린지 성공!</span></li>
+          <li data-n="5"><span>개인 누적 점수 <b>1·2·3위는 시상</b>이 있어요! 랭킹에서 금·은·동 왕관으로 확인하세요.</span></li>
         </ol>
       </section>
       <img class="slogan" src="img/slogan.webp" width="720" height="316" alt="지속 가능한 오늘, 더 건강한 내일, KOHI와 함께! KOHI 한국보건복지인재원">
@@ -387,6 +443,7 @@ button.cell:active { transform: scale(.96); }
     </button>
 
     <div class="big" id="d-cell"></div>
+    <p class="mission-rule" id="d-rule"></p>
 
     <section class="box" id="form-panel">
       <h3 class="tab">인증 올리기</h3>
@@ -461,16 +518,18 @@ button.cell:active { transform: scale(.96); }
     { id: "p9", label: "참가자9", name: "유00" }
   ];
   const PEOPLE_BY_ID = new Map(PEOPLE.map((p) => [p.id, p]));
+  /* team: 팀 과제. 팀원 중 한 명이 팀을 대표해 goal회 인증하면 달성되고, 달성하면 참가자 모두 TEAM_POINTS점.
+     나머지는 개인 과제. 직접 실천한 사람이 올리고, 인증 1건마다 올린 사람에게 INDIV_POINTS점. */
   const MISSIONS = [
-    { n: 1, name: "팀 전원 개인 텀블러 사용", goal: 1, eg: "예) 오늘 팀원 모두 개인 텀블러를 사용했어요." },
-    { n: 2, name: "이면지 재활용함 운영", goal: 3, eg: "예) 복합기 옆 이면지 재활용함을 정리하고 다시 채웠어요." },
-    { n: 3, name: "폐건전지 수거함 운영", goal: 3, eg: "예) 수거함에 모인 폐건전지를 확인하고 배출했어요." },
-    { n: 4, name: "다회용 공용 비품함 운영", goal: 3, eg: "예) 공용 비품함을 정리하고 필요한 비품을 채웠어요." },
-    { n: 5, name: "공용 냉장고 이름표 부착 및 유통기한 점검", goal: 1, eg: "예) 이름표를 붙이고 유통기한이 지난 음식을 정리했어요." },
-    { n: 6, name: "일회용품 없는 회의", goal: 3, eg: "예) 주간회의를 종이컵과 생수병 없이 진행했어요." },
-    { n: 7, name: "점심시간 불필요한 전력 차단", goal: 3, eg: "예) 점심시간에 모니터와 조명을 끄고 나갔어요." },
-    { n: 8, name: "공용 손수건·행주 비치", goal: 1, eg: "예) 탕비실에 공용 손수건과 행주를 비치했어요." },
-    { n: 9, name: "점심 플로깅(줍깅)", goal: 1, eg: "예) 점심시간에 건물 주변을 걸으며 쓰레기를 주웠어요." }
+    { n: 1, name: "팀 전원 개인 텀블러 사용", goal: 1, team: true, eg: "예) 오늘 팀원 모두 개인 텀블러를 사용했어요. (단체 사진)" },
+    { n: 2, name: "이면지 재활용함 활용", goal: 3, eg: "예) 이면지 재활용함의 종이를 가져와 회의 메모에 썼어요." },
+    { n: 3, name: "폐건전지 수거함 활용", goal: 3, eg: "예) 집에서 다 쓴 건전지를 가져와 수거함에 넣었어요." },
+    { n: 4, name: "다회용 공용 비품함 활용", goal: 3, eg: "예) 일회용품 대신 공용 비품함의 다회용 컵과 수저를 썼어요." },
+    { n: 5, name: "공용 냉장고 이름표 부착 및 유통기한 점검", goal: 1, team: true, eg: "예) 팀이 함께 이름표를 붙이고 유통기한이 지난 음식을 정리했어요." },
+    { n: 6, name: "일회용품 없는 회의", goal: 1, team: true, eg: "예) 주간회의를 종이컵과 생수병 없이 진행했어요." },
+    { n: 7, name: "점심시간 불필요한 전력 차단", goal: 3, eg: "예) 점심시간에 내 모니터와 자리 조명을 끄고 나갔어요." },
+    { n: 8, name: "공용 손수건·행주 활용", goal: 3, eg: "예) 휴지 대신 탕비실의 공용 손수건과 행주를 썼어요." },
+    { n: 9, name: "점심 플로깅(줍깅)", goal: 1, team: true, eg: "예) 팀이 함께 점심시간에 건물 주변을 걸으며 쓰레기를 주웠어요." }
   ];
   const LINES = [
     { cells: [1, 2, 3], label: "가로 첫째 줄" }, { cells: [4, 5, 6], label: "가로 둘째 줄" }, { cells: [7, 8, 9], label: "가로 셋째 줄" },
@@ -504,6 +563,32 @@ button.cell:active { transform: scale(.96); }
   }
   function linesOf(done) {
     return LINES.filter((l) => l.cells.every((n) => done.has(n)));
+  }
+  /* 개인 점수 = 개인 과제 인증 수 × INDIV_POINTS + 달성한 팀 과제 수 × TEAM_POINTS(참가자 모두).
+     점수가 같으면 같은 순위로 두고, 그 점수에 먼저 도달한 사람을 위에 둔다. */
+  const INDIV_POINTS = 5, TEAM_POINTS = 10;
+  function scores(entries) {
+    const by = new Map(PEOPLE.map((p) => [p.id, { who: p.id, count: 0, indiv: 0, team: 0, last: 0 }]));
+    const teamCount = new Map();
+    for (const e of [...entries].sort((a, b) => a.createdAt - b.createdAt)) {
+      const m = MISSIONS[e.mission - 1];
+      if (m.team) {
+        const c = (teamCount.get(m.n) || 0) + 1;
+        teamCount.set(m.n, c);
+        if (c === m.goal) for (const r of by.values()) { r.team += TEAM_POINTS; r.last = Math.max(r.last, e.createdAt); }
+      } else if (by.has(e.who)) {
+        const r = by.get(e.who);
+        r.count++; r.indiv += INDIV_POINTS; r.last = Math.max(r.last, e.createdAt);
+      }
+    }
+    for (const r of by.values()) r.score = r.indiv + r.team;
+    return by;
+  }
+  function ranking(entries) {
+    const list = [...scores(entries).values()].filter((r) => r.score > 0)
+      .sort((a, b) => b.score - a.score || a.last - b.last);
+    list.forEach((r, i) => { r.rank = i && r.score === list[i - 1].score ? list[i - 1].rank : i + 1; });
+    return list;
   }
   function todayStr() {
     const d = new Date();
@@ -569,7 +654,7 @@ button.cell:active { transform: scale(.96); }
   /* ---------- 칸 ---------- */
   function buildCell(m, tag) {
     const el = document.createElement(tag);
-    el.className = "cell";
+    el.className = "cell" + (m.team ? " is-team" : "");
     if (tag === "button") el.type = "button";
     el.style.setProperty("--i", m.n);
     const head = document.createElement("span"); head.className = "cell-head";
@@ -628,14 +713,13 @@ button.cell:active { transform: scale(.96); }
     });
   }
   function renderPick() {
-    const counts = new Map(PEOPLE.map((p) => [p.id, 0]));
-    for (const e of state.entries) counts.set(e.who, (counts.get(e.who) || 0) + 1);
+    const all = scores(state.entries);
     for (const p of PEOPLE) {
-      const c = counts.get(p.id);
+      const score = all.get(p.id).score;
       const btn = $("person-" + p.id);
       btn.classList.toggle("is-last", p.id === state.me);
-      btn.querySelector(".person-state").textContent = state.loaded ? "인증 " + c + "건" : "";
-      btn.setAttribute("aria-label", p.label + " " + p.name + (state.loaded ? ", 인증 " + c + "건" : "") + (p.id === state.me ? ", 지금 고른 참가자" : ""));
+      btn.querySelector(".person-state").textContent = state.loaded ? score + "점" : "";
+      btn.setAttribute("aria-label", p.label + " " + p.name + (state.loaded ? ", " + score + "점" : "") + (p.id === state.me ? ", 지금 고른 참가자" : ""));
     }
     $("p-pill").textContent = state.available === false ? "기록을 불러오지 못했습니다" : !state.loaded ? "기록을 불러오는 중" : "참여 " + PEOPLE.length + "명";
   }
@@ -706,7 +790,7 @@ button.cell:active { transform: scale(.96); }
       btn.classList.toggle("on-line", onLine.has(m.n));
       updateCell(btn, m, c, boardVisible && state.fresh.has(m.n), false);
       if (onLine.has(m.n)) btn.querySelector(".band-text").textContent = "빙고!";
-      btn.setAttribute("aria-label", "미션 " + m.n + ", " + m.name + ", " + (done.has(m.n) ? "도장 완료" : "목표 " + m.goal + "회 중 " + c + "회"));
+      btn.setAttribute("aria-label", "미션 " + m.n + ", " + (m.team ? "팀 과제, " : "") + m.name + ", " + (done.has(m.n) ? "도장 완료" : "목표 " + m.goal + "회 중 " + c + "회"));
       btn.classList.remove("cheer");
     }
     if (boardVisible && state.fresh.size) {
@@ -723,6 +807,8 @@ button.cell:active { transform: scale(.96); }
     else if (!state.loaded) pill.textContent = "기록을 불러오는 중";
     else pill.textContent = "한 줄을 완성하면 챌린지 성공";
 
+    renderRank();
+
     const feed = $("feed");
     const latest = [...state.entries].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6);
     feed.replaceChildren(...latest.map((e) => entryItem(e, { showMission: true })));
@@ -736,6 +822,48 @@ button.cell:active { transform: scale(.96); }
       fresh.forEach((l) => l.cells.forEach((n, k) => { const b = $("cell-" + n); b.style.setProperty("--k", k); b.classList.add("cheer"); }));
       setTimeout(() => { fx.rain(); toast("빙고! " + fresh.map((l) => l.label).join(", ") + " 완성"); }, 350);
     }
+  }
+
+  /* ---------- 개인 랭킹 (1~5위, 1·2·3위는 금·은·동 왕관) ---------- */
+  const CROWNS = ["gold", "silver", "bronze"];
+  function crownSvg(rank) {
+    return '<svg class="crown ' + CROWNS[rank - 1] + '" viewBox="0 0 40 30" aria-hidden="true">' +
+      '<path class="c-body" d="M5 22 3 8l8.5 6.5L20 3l8.5 11.5L37 8l-2 14z"/>' +
+      '<path class="c-band" d="M5 22h30v5H5z"/>' +
+      '<path class="c-shine" d="M9 18.5 8 12.5"/>' +
+      '<circle class="c-gem" cx="3" cy="8" r="2.3"/><circle class="c-gem" cx="20" cy="3" r="2.6"/><circle class="c-gem" cx="37" cy="8" r="2.3"/>' +
+      '<text x="20" y="20.5">' + rank + '</text>' +
+    '</svg>';
+  }
+  function rankRow(r, i) {
+    const p = PEOPLE_BY_ID.get(r.who);
+    const li = document.createElement("li");
+    li.className = "rank-row" + (r.rank <= 3 ? " r" + r.rank : "") + (r.who === state.me ? " is-me" : "");
+    li.style.setProperty("--i", i);
+    const pos = document.createElement("span"); pos.className = "rank-pos";
+    if (r.rank <= 3) pos.innerHTML = crownSvg(r.rank) + '<span class="sr-only">' + r.rank + "위</span>";
+    else pos.textContent = r.rank + "위";
+    const who = document.createElement("span"); who.className = "rank-who";
+    const tag = document.createElement("span"); tag.className = "who-tag"; tag.textContent = p.label;
+    const name = document.createElement("b"); name.textContent = p.name;
+    who.append(tag, name);
+    if (r.who === state.me) { const me = document.createElement("span"); me.className = "rank-me-tag"; me.textContent = "나"; who.append(me); }
+    const score = document.createElement("span"); score.className = "rank-score";
+    const b = document.createElement("b"); b.textContent = r.score;
+    const small = document.createElement("small"); small.textContent = "개인 " + r.indiv + " · 팀 " + r.team;
+    score.append(b, "점", small);
+    li.append(pos, who, score);
+    return li;
+  }
+  function renderRank() {
+    const list = ranking(state.entries);
+    const top = list.filter((r) => r.rank <= 5);
+    $("rank").replaceChildren(...top.map(rankRow));
+    $("rank-empty").hidden = !state.loaded || top.length > 0;
+    const mine = list.find((r) => r.who === state.me);
+    const meEl = $("rank-me");
+    meEl.hidden = !state.loaded || !state.me || top.length === 0 || (mine && mine.rank <= 5);
+    meEl.textContent = mine ? "나의 순위: " + mine.rank + "위 · " + mine.score + "점" : "아직 내 점수가 없어요. 개인 과제를 인증하면 " + INDIV_POINTS + "점!";
   }
 
   /* ---------- 인증 한 건 ---------- */
@@ -848,6 +976,12 @@ button.cell:active { transform: scale(.96); }
     const m = MISSIONS[n - 1], p = PEOPLE_BY_ID.get(state.me);
     const big = buildCell(m, "div"); big.id = "d-card";
     $("d-cell").replaceChildren(big);
+    const rule = $("d-rule"), tagEl = document.createElement("b");
+    tagEl.textContent = m.team ? "팀 과제" : "개인 과제";
+    rule.className = "mission-rule" + (m.team ? " team" : "");
+    rule.replaceChildren(tagEl, document.createTextNode(m.team
+      ? "팀원 중 한 명이 팀을 대표해 " + m.goal + "회 인증하면 달성! 달성하면 참가자 모두 " + TEAM_POINTS + "점을 받아요."
+      : "직접 실천한 사람이 올려요. 인증 1건마다 올린 사람에게 " + INDIV_POINTS + "점! " + m.goal + "회 인증하면 도장이 찍혀요."));
     $("f-note").placeholder = m.eg;
     const tag = document.createElement("span"); tag.className = "who-tag"; tag.textContent = p.label;
     $("f-who").replaceChildren(tag, document.createTextNode(p.name));
@@ -866,12 +1000,20 @@ button.cell:active { transform: scale(.96); }
     $("entries-empty").hidden = mine.length > 0;
     renderAccess();
   }
+  /* 이미 달성한 팀 과제는 더 올릴 수 없다(점수도 더 생기지 않는다). */
+  const teamClosed = (n) => {
+    const m = MISSIONS[n - 1];
+    return !!m.team && state.entries.filter((e) => e.mission === n).length >= m.goal;
+  };
   function renderAccess() {
-    const ok = writable();
+    const closed = !!state.current && teamClosed(state.current);
+    const ok = writable() && !closed;
     $("form-panel").hidden = !ok;
     const note = $("ro-note");
-    note.hidden = ok || state.available === null;
-    note.textContent = "지금은 인증을 올릴 수 없습니다. 인터넷 연결을 확인하고 페이지를 새로 고쳐주세요.";
+    note.hidden = ok || (state.available === null && !closed);
+    note.textContent = closed
+      ? "팀 과제를 달성했어요! 참가자 모두 " + TEAM_POINTS + "점을 받았습니다. 팀 과제는 한 번만 인증하면 됩니다."
+      : "지금은 인증을 올릴 수 없습니다. 인터넷 연결을 확인하고 페이지를 새로 고쳐주세요.";
   }
   function render() { renderPick(); renderBoard(); renderDetail(false); }
   function setNotice(msg) {
@@ -940,6 +1082,7 @@ button.cell:active { transform: scale(.96); }
   async function submitProof(ev) {
     ev.preventDefault();
     if (state.busy || !state.current || !state.api || !writable()) return;
+    if (teamClosed(state.current)) { renderAccess(); return; }
     const note = $("f-note").value.trim();
     const date = $("f-date").value;
     if (!state.file) return showError("사진을 골라주세요.");
@@ -975,9 +1118,11 @@ button.cell:active { transform: scale(.96); }
       const others = state.entries.filter((e) => e.id !== id);
       const after = doneOf(countsOf(others.concat([{ id, mission }])));
       const count = countsOf(others).get(mission) + 1;
-      if (linesOf(after).length > linesBefore) toast("한 줄 완성! 도장판에서 확인해보세요.");
-      else if (after.has(mission) && !before.has(mission)) toast("그린품질도장이 찍혔습니다!");
-      else toast("인증이 기록됐습니다. (" + count + " / " + m.goal + "회)");
+      const plus = m.team ? " 참가자 모두 +" + TEAM_POINTS + "점" : " +" + INDIV_POINTS + "점";
+      if (linesOf(after).length > linesBefore) toast("한 줄 완성! 도장판에서 확인해보세요." + plus);
+      else if (m.team && after.has(mission)) toast("팀 과제 달성!" + plus);
+      else if (after.has(mission) && !before.has(mission)) toast("그린품질도장이 찍혔습니다!" + plus);
+      else toast("인증이 기록됐습니다." + plus + " (" + count + " / " + m.goal + "회)");
       resetForm();
     } finally {
       state.busy = false; btn.disabled = false; btn.textContent = "인증 올리기";
