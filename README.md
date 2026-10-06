@@ -1,0 +1,80 @@
+# ECO-100 친환경 빙고 챌린지 도장판
+
+포스터(ECO-100 챌린지, A3)를 그대로 옮긴 모바일 우선 웹 페이지. **참가자 모두가 하나의 도장판을 함께 채운다.**
+처음 들어오면 "나는 누구인가요?"에서 참가자를 고르고, 미션 칸을 눌러 사진과 실천 내용을 올린다.
+올린 인증에는 작성자(참가자 번호와 이름)가 표시되고, 목표 횟수를 채운 칸에 '그린품질도장'이 찍히며,
+가로·세로·대각선 한 줄이 완성되면 빙고로 표시된다. 로그인 화면은 없어서 QR로 누구나 들어올 수 있다.
+
+- 호스팅: **GitHub Pages** (무료, https 주소)
+- 저장소: **Supabase** (무료 요금제). 인증 기록은 Postgres 표, 사진은 Storage, 사용자 구분은 익명 로그인으로 처리한다.
+
+## 파일
+
+- `index.html`: 화면, 스타일, 스크립트를 모두 담은 한 파일 (빌드 과정 없음)
+- `supabase-config.js`: Supabase 주소와 공개 키 (**처음 한 번 채워야 함**)
+- `supabase-setup.sql`: 표, 보안 정책, 실시간, 사진 저장소를 한 번에 만드는 SQL
+- `img/`: 포스터에서 잘라낸 그림
+
+## 처음 설정 1: Supabase (약 10분)
+
+1. https://supabase.com/dashboard 에서 **New project**를 만든다. Region은 `Northeast Asia (Seoul)`로 한다.
+2. 왼쪽 **SQL Editor** → New query에 `supabase-setup.sql` 내용을 전부 붙여 넣고 **Run**.
+   ("Success. No rows returned"가 나오면 정상이다.)
+3. **Authentication → Sign In / Providers**에서 **Allow anonymous sign-ins**를 켜고 저장한다.
+4. **Authentication → Rate Limits**에서 익명 로그인 한도(기본: IP당 시간당 30회)를 넉넉히(예: 300) 올린다.
+   회사 와이파이처럼 여러 사람이 같은 인터넷 주소로 접속하면 기본 한도에 걸릴 수 있다.
+5. **Project Settings → Data API(또는 API Keys)**에서 아래 두 값을 복사해 `supabase-config.js`에 넣는다.
+   - `url`: Project URL (`https://xxxx.supabase.co`)
+   - `key`: `anon public` 키 또는 `publishable` 키
+   이 키는 공개되어도 괜찮다(보안은 RLS 정책이 맡는다). **`service_role`이나 `secret` 키는 절대 넣지 않는다.**
+
+## 처음 설정 2: GitHub Pages (약 5분, 설치할 것 없음)
+
+1. https://github.com/new 에서 저장소를 만든다(예: `eco100-bingo`). 무료 계정에서 Pages를 쓰려면 **Public**이어야 한다.
+2. 만든 저장소 화면의 **uploading an existing file**을 누르고, `eco100-bingo` 폴더 **안의** 파일과 `img` 폴더를 전부 끌어다 놓은 뒤
+   **Commit changes**를 누른다. `index.html`이 저장소 맨 위에 있어야 한다.
+3. 저장소 **Settings → Pages**에서 Source를 `Deploy from a branch`, Branch를 `main` / `/ (root)`로 고르고 Save.
+4. 1~2분 뒤 같은 화면 위쪽에 `https://<아이디>.github.io/eco100-bingo/` 주소가 나온다. 이 주소로 QR 코드를 만든다.
+
+> Public 저장소라서 코드와 `supabase-config.js`의 공개 키는 누구나 볼 수 있다. 원래 공개용 키라서 괜찮다.
+> 단, 인증 사진과 기록도 주소를 아는 사람은 볼 수 있다는 점을 참가자에게 알린다.
+
+수정한 파일을 다시 올릴 때는 저장소에서 **Add file → Upload files**로 같은 이름의 파일을 올리면 덮어쓰고, 1~2분 뒤 반영된다.
+
+## 사용 흐름과 주소
+
+- 처음 들어온 기기: 참가자 고르기 → 공유 도장판. 고른 참가자는 그 기기에 기억되어 다음부터는 바로 도장판이 열린다.
+- 도장판의 "다른 참가자로 바꾸기"를 누르면 다시 고를 수 있다.
+- 주소: `/` 도장판, `/#m3` 미션 3 상세, `/#pick` 참가자 고르기. 휴대폰 뒤로 가기 버튼으로 화면 사이를 오갈 수 있다.
+- 다른 사람이 올린 인증은 새로 고치지 않아도 실시간으로 반영된다.
+
+## 참가자 (`PEOPLE`, index.html 스크립트 맨 위)
+
+참가자1 나00 · 참가자2 조00 · 참가자3 이00 · 참가자4 신00 · 참가자5 강00 · 참가자6 0주0 · 참가자7 00철 · 참가자8 00섬 · 참가자9 유00
+
+**참가자를 추가하면 `supabase-setup.sql`의 `who in ('p1', …, 'p9')` 목록도 고쳐야 한다.** 이미 만든 표는
+SQL Editor에서 제약을 바꿔야 한다(필요하면 요청할 것). 이름만 바꾸는 것은 id(`p1` 등)를 그대로 두면 안전하다.
+
+## 데이터 모양
+
+- 표 `public.entries`: `id uuid, who 'p1'~'p9', mission 1~9, note, date, thumb(작은 JPEG data URL), photo_path, uid, created_at`
+- Storage 버킷 `photos`: `<uid>/<id>.jpg` (1MB 이하 JPEG, 공개 읽기)
+
+규칙(RLS): 누구나 읽기 · 자기 uid로만 올리기 · 올린 기기만 삭제 · 수정 불가.
+잘못 올라온 기록은 관리자가 대시보드 **Table Editor → entries**에서 행을 지우고, **Storage → photos**에서 같은 사진을 지운다.
+
+## 알아 둘 것
+
+- 무료 요금제 한도: DB 500MB, Storage 1GB, 전송량 월 5GB. 사진은 장당 최대 약 0.9MB로 줄여 올리므로 수백~천 장 규모까지 충분하다.
+- **Supabase 무료 프로젝트는 7일 동안 아무 요청이 없으면 일시 정지된다.** 챌린지 기간에는 매일 쓰이므로 문제없지만,
+  쉬는 기간 뒤에는 대시보드에서 Restore를 눌러야 할 수 있다.
+- 브라우저 데이터를 지우거나 기기를 바꾸면 이전에 올린 인증을 그 기기에서 삭제할 수 없다. 관리자가 대시보드에서 지운다.
+- 참가자 선택은 본인 확인이 아니다. 누구나 아무 이름이나 고를 수 있다(요구사항: 로그인 없이 입장).
+- 저장소를 다시 바꾸려면 `index.html`의 `connect()`만 고치면 된다. 화면 코드는 `state.api`(photoUrl, add, remove)와
+  `onEntries(rows)`만 쓴다.
+
+## 미션과 목표 횟수 (`MISSIONS`)
+
+1 팀 전원 개인 텀블러 사용 1회 · 2 이면지 재활용함 운영 3회 · 3 폐건전지 수거함 운영 3회 · 4 다회용 공용 비품함 운영 3회 ·
+5 공용 냉장고 이름표 부착 및 유통기한 점검 1회 · 6 일회용품 없는 회의 3회 · 7 점심시간 불필요한 전력 차단 3회 ·
+8 공용 손수건·행주 비치 1회(횟수 미확정, 임시값) · 9 점심 플로깅(줍깅) 1회
