@@ -117,14 +117,22 @@ img { display: block; }
 
 /* ── 개인 랭킹 ── */
 .rank-box { margin-top: 32px; }
-.rank-rule { margin: -6px 2px 10px; font-size: .8125rem; color: var(--muted); }
-.rank-rule b { font-weight: 400; font-family: var(--font-title); color: var(--forest); }
+.tab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; }
+.tab-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s; }
+.tab-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.rank-more {
+  display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; padding: 9px 12px;
+  border: 1.5px dashed #BFDDAA; border-radius: 12px; background: #F3FAEC; color: var(--forest);
+  font-family: var(--font-title); font-size: .9375rem; transition: background .2s;
+}
+.rank-more:hover { background: #E6F4D9; }
+.rank-row.zero { opacity: .62; }
 .rank { display: flex; flex-direction: column; gap: 6px; }
 .rank-row {
   display: grid; grid-template-columns: 50px minmax(0, 1fr) auto; align-items: center; gap: 8px;
   padding: 7px 12px 7px 6px; border-radius: 14px; background: var(--paper); border: 1px solid var(--hair);
-  animation: view-in .4s ease both; animation-delay: calc(var(--i) * 60ms);
 }
+.rank.anim .rank-row { animation: view-in .4s ease both; animation-delay: calc(var(--i) * 45ms); }
 .rank-row.r1 { background: linear-gradient(90deg, #FFF4C2, var(--paper) 75%); border-color: #F1D877; }
 .rank-row.r2 { background: linear-gradient(90deg, #EEF1F5, var(--paper) 75%); border-color: #D6DCE3; }
 .rank-row.r3 { background: linear-gradient(90deg, #FBE7D8, var(--paper) 75%); border-color: #EBC6A8; }
@@ -192,13 +200,18 @@ button.cell:active { transform: scale(.96); }
 .cell.on-line .band-fill { background: linear-gradient(90deg, #FFE98A, #FFB300); }
 .cell.on-line.is-done .band-text { color: #5B3A00; }
 @keyframes cheer { 0% { transform: none; } 40% { transform: translateY(-10px) scale(1.06) rotate(-2deg); } 100% { transform: none; } }
-/* 팀 과제 표시: 칸 오른쪽 위의 노란 리본 */
+/* 팀 과제 표시: 노란 테두리 위를 반짝이가 한 바퀴씩 돈다 (글자를 가리지 않도록 테두리에만 그린다) */
+@property --spin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 .cell.is-team { background: linear-gradient(#FFFBE6, var(--card) 45%); border-color: #F1DC86; }
 .cell.is-team::before {
-  content: "팀 과제"; position: absolute; top: -7px; right: 6px; z-index: 2; padding: 1px 7px 2px; border-radius: 999px;
-  font-family: var(--font-title); font-size: 10px; font-size: clamp(10px, 6.4cqw, 14px); line-height: 1.3;
-  color: #6B4700; background: linear-gradient(#FFE98A, #FFC933); box-shadow: 0 0 0 1.5px var(--card), 0 2px 3px rgba(120, 80, 0, .25);
+  content: ""; position: absolute; inset: -1.5px; z-index: 1; padding: 2.5px; border-radius: inherit; pointer-events: none;
+  background: conic-gradient(from var(--spin), transparent 0 78%, rgba(255, 233, 138, .7) 86%, #FFFFFF 91%, #FFC21A 94%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: spin-glint 3.2s linear infinite; animation-delay: calc(var(--i, 0) * -.8s);
+  filter: drop-shadow(0 0 2px rgba(255, 196, 0, .8));
 }
+@keyframes spin-glint { to { --spin: 360deg; } }
 .mission-rule { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--band); color: var(--forest); font-size: .9375rem; }
 .mission-rule.team { background: #FFF4C2; color: #5B4200; }
 .mission-rule b { flex: none; font-weight: 400; font-family: var(--font-title); padding: 0 9px; border-radius: 999px; background: var(--forest); color: var(--white); font-size: .8125rem; line-height: 1.6; }
@@ -249,16 +262,17 @@ button.cell:active { transform: scale(.96); }
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 21C3 10 10 3 21 3c0 11-7 18-18 18z' fill='%237CC96B'/%3E%3Cpath d='M5 19 16 8' stroke='%23DFF5C9' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .sprig { position: absolute; bottom: 0; mix-blend-mode: multiply; pointer-events: none; }
-.sprig-l { left: 6px; width: 78px; display: none; }
+.sprig-l { left: 4px; width: 58px; display: none; }
 .sprig-r { right: 2px; width: 44px; opacity: .9; }
-.steps { position: relative; display: flex; flex-direction: column; gap: 9px; padding-right: 34px; }
-.steps li { display: flex; gap: 10px; align-items: flex-start; }
+.steps { position: relative; display: flex; flex-direction: column; gap: 14px; padding-right: 30px; }
+.steps li { display: flex; gap: 10px; align-items: flex-start; font-size: .96875rem; line-height: 1.7; letter-spacing: -.02em; word-spacing: .04em; }
+.steps li > span { padding-top: 1px; }
 .steps li::before {
   content: attr(data-n); flex: none; width: 26px; height: 26px; border-radius: 50%;
   display: grid; place-items: center; background: var(--forest); color: var(--white); box-shadow: 0 0 0 2px #CFE6C0;
   font-family: var(--font-title); font-size: 1rem; line-height: 1;
 }
-.steps b { font-weight: 400; font-family: var(--font-title); background: #D9F0C6; border-radius: 6px; padding: 0 4px; }
+.steps b { font-weight: 400; font-family: var(--font-title); letter-spacing: 0; background: #D9F0C6; border-radius: 6px; padding: 0 4px; margin: 0 1px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .slogan { width: 100%; max-width: 420px; height: auto; margin-inline: auto; }
 
 /* ── 최근 인증 ── */
@@ -339,12 +353,13 @@ button.cell:active { transform: scale(.96); }
   .panel { padding: 12px 11px 11px; }
   .foot-zone { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
   .sprig-l { display: block; }
-  .steps { padding-left: 84px; padding-right: 44px; }
+  .steps { padding-left: 64px; padding-right: 34px; }
   .words li + li { padding-left: 22px; border-left: 1.5px solid #1F4D3A; }
   .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .cell.is-team::before { background: none; }
   .leaves { display: none; }
 }
 </style>
@@ -403,12 +418,12 @@ button.cell:active { transform: scale(.96); }
         </div>
       </div>
 
-      <section class="box rank-box" aria-labelledby="rank-title">
-        <h2 class="tab" id="rank-title">개인 랭킹</h2>
-        <p class="rank-rule">개인 과제 인증 1건 <b>5점</b> · 팀 과제 달성 시 참가자 모두 <b>10점</b> · 1·2·3위 시상</p>
+      <section class="box rank-box" aria-labelledby="rank-toggle">
+        <h2 class="tab"><button type="button" class="tab-btn" id="rank-toggle" aria-expanded="false" aria-controls="rank">개인 랭킹<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg></button></h2>
         <ol class="rank" id="rank" aria-live="polite"></ol>
-        <p class="empty" id="rank-empty" hidden>아직 점수가 없습니다. 개인 과제를 인증하면 5점, 팀 과제를 달성하면 모두 10점!</p>
+        <p class="empty" id="rank-empty" hidden>아직 점수가 없습니다.</p>
         <p class="rank-me" id="rank-me" hidden></p>
+        <button type="button" class="rank-more" id="rank-more" aria-controls="rank">팀 전원 점수 보기</button>
       </section>
     </div>
 
@@ -420,9 +435,9 @@ button.cell:active { transform: scale(.96); }
         <ol class="steps">
           <li data-n="1"><span>9가지 미션을 확인하고, 100일 동안 다 함께 실천해요! 도장판은 팀 전체가 함께 채우는 한 장이에요.</span></li>
           <li data-n="2"><span><b>개인 과제</b>(목표 3회)는 직접 실천한 사람이 칸을 눌러 사진과 내용을 올려요. 인증 1건마다 올린 사람에게 <b>5점</b>!</span></li>
-          <li data-n="3"><span><b>팀 과제</b>(노란 '팀 과제' 표시, 목표 1회)는 팀원 중 한 명이 팀을 대표해 올려요. 달성하면 참가자 모두 <b>10점</b>!</span></li>
+          <li data-n="3"><span><b>팀 과제</b>(테두리가 반짝이는 칸, 목표 1회)는 팀원 중 한 명이 팀을 대표해 올려요. 달성하면 참가자 모두 <b>10점</b>!</span></li>
           <li data-n="4"><span>목표 횟수를 채운 칸에는 <b>그린품질도장</b>이 찍히고, 가로·세로·대각선 중 한 줄 이상 완성하면 챌린지 성공!</span></li>
-          <li data-n="5"><span>개인 누적 점수 <b>1·2·3위는 시상</b>이 있어요! 랭킹에서 금·은·동 왕관으로 확인하세요.</span></li>
+          <li data-n="5"><span>개인 누적 점수 <b>1·2·3위는 시상</b>이 있어요! '개인 랭킹'을 누르면 팀 전원의 점수를 볼 수 있어요.</span></li>
         </ol>
       </section>
       <img class="slogan" src="img/slogan.webp" width="720" height="316" alt="지속 가능한 오늘, 더 건강한 내일, KOHI와 함께! KOHI 한국보건복지인재원">
@@ -584,9 +599,10 @@ button.cell:active { transform: scale(.96); }
     for (const r of by.values()) r.score = r.indiv + r.team;
     return by;
   }
-  function ranking(entries) {
-    const list = [...scores(entries).values()].filter((r) => r.score > 0)
-      .sort((a, b) => b.score - a.score || a.last - b.last);
+  /* withZero: 0점인 참가자도 넣는다(팀 전원 보기). */
+  function ranking(entries, withZero) {
+    const list = [...scores(entries).values()].filter((r) => withZero || r.score > 0)
+      .sort((a, b) => b.score - a.score || a.last - b.last || PEOPLE.findIndex((p) => p.id === a.who) - PEOPLE.findIndex((p) => p.id === b.who));
     list.forEach((r, i) => { r.rank = i && r.score === list[i - 1].score ? list[i - 1].rank : i + 1; });
     return list;
   }
@@ -678,9 +694,11 @@ button.cell:active { transform: scale(.96); }
     slot.classList.toggle("is-done", isDone);
     slot.classList.toggle("thunk", !!animate);
     el.querySelector(".band-fill").style.width = Math.round(Math.min(1, c / m.goal) * 100) + "%";
-    el.querySelector(".band-text").textContent = isDone
-      ? (long ? "목표 " + m.goal + "회 달성! 도장 완료" : "도장 완료!")
-      : (long ? "목표 " + m.goal + "회 중 " + c + "회 인증" : c + " / " + m.goal + "회");
+    el.querySelector(".band-text").textContent = m.team
+      ? (isDone ? (long ? "팀 과제 달성! 도장 완료" : "팀 과제 완료!") : (long ? "팀 과제 · 목표 " + m.goal + "회 중 " + c + "회 인증" : "팀 " + c + " / " + m.goal + "회"))
+      : isDone
+        ? (long ? "목표 " + m.goal + "회 달성! 도장 완료" : "도장 완료!")
+        : (long ? "목표 " + m.goal + "회 중 " + c + "회 인증" : c + " / " + m.goal + "회");
     if (animate) setTimeout(() => fx.burst(slot, 20), 260);
   }
 
@@ -838,10 +856,11 @@ button.cell:active { transform: scale(.96); }
   function rankRow(r, i) {
     const p = PEOPLE_BY_ID.get(r.who);
     const li = document.createElement("li");
-    li.className = "rank-row" + (r.rank <= 3 ? " r" + r.rank : "") + (r.who === state.me ? " is-me" : "");
+    const crowned = r.rank <= 3 && r.score > 0;
+    li.className = "rank-row" + (crowned ? " r" + r.rank : "") + (r.score ? "" : " zero") + (r.who === state.me ? " is-me" : "");
     li.style.setProperty("--i", i);
     const pos = document.createElement("span"); pos.className = "rank-pos";
-    if (r.rank <= 3) pos.innerHTML = crownSvg(r.rank) + '<span class="sr-only">' + r.rank + "위</span>";
+    if (crowned) pos.innerHTML = crownSvg(r.rank) + '<span class="sr-only">' + r.rank + "위</span>";
     else pos.textContent = r.rank + "위";
     const who = document.createElement("span"); who.className = "rank-who";
     const tag = document.createElement("span"); tag.className = "who-tag"; tag.textContent = p.label;
@@ -855,15 +874,28 @@ button.cell:active { transform: scale(.96); }
     li.append(pos, who, score);
     return li;
   }
+  /* 평소에는 1~3위만, '개인 랭킹' 탭이나 아래 버튼을 누르면 팀 전원(0점 포함)을 보여 준다. */
+  let rankOpen = false;
   function renderRank() {
-    const list = ranking(state.entries);
-    const top = list.filter((r) => r.rank <= 5);
-    $("rank").replaceChildren(...top.map(rankRow));
-    $("rank-empty").hidden = !state.loaded || top.length > 0;
+    const list = ranking(state.entries, rankOpen);
+    const shown = rankOpen ? list : list.filter((r) => r.rank <= 3);
+    $("rank").replaceChildren(...shown.map(rankRow));
+    $("rank-empty").hidden = !state.loaded || shown.length > 0;
     const mine = list.find((r) => r.who === state.me);
     const meEl = $("rank-me");
-    meEl.hidden = !state.loaded || !state.me || top.length === 0 || (mine && mine.rank <= 5);
-    meEl.textContent = mine ? "나의 순위: " + mine.rank + "위 · " + mine.score + "점" : "아직 내 점수가 없어요. 개인 과제를 인증하면 " + INDIV_POINTS + "점!";
+    meEl.hidden = rankOpen || !state.loaded || !mine || mine.rank <= 3;
+    meEl.textContent = mine ? "나의 순위: " + mine.rank + "위 · " + mine.score + "점" : "";
+    $("rank-toggle").setAttribute("aria-expanded", String(rankOpen));
+    $("rank-more").textContent = rankOpen ? "1~3위만 보기" : "팀 전원 점수 보기";
+  }
+  let rankAnimTimer = 0;
+  function toggleRank() {
+    rankOpen = !rankOpen;
+    const list = $("rank");
+    list.classList.add("anim");
+    renderRank();
+    clearTimeout(rankAnimTimer);
+    rankAnimTimer = setTimeout(() => list.classList.remove("anim"), 900);
   }
 
   /* ---------- 인증 한 건 ---------- */
@@ -1283,6 +1315,8 @@ button.cell:active { transform: scale(.96); }
 
   $("back").addEventListener("click", closeMission);
   $("switch").addEventListener("click", () => go("#pick"));
+  $("rank-toggle").addEventListener("click", toggleRank);
+  $("rank-more").addEventListener("click", toggleRank);
   $("proof-form").addEventListener("submit", submitProof);
   $("f-photo").addEventListener("change", (ev) => {
     const f = ev.target.files && ev.target.files[0];
