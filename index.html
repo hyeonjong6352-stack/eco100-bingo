@@ -212,6 +212,14 @@ button.cell:active { transform: scale(.96); }
   filter: drop-shadow(0 0 2px rgba(255, 196, 0, .8));
 }
 @keyframes spin-glint { to { --spin: 360deg; } }
+.how { display: flex; flex-direction: column; gap: 8px; }
+.how li { position: relative; padding-left: 22px; line-height: 1.7; letter-spacing: -.02em; }
+.how li::before {
+  content: ""; position: absolute; left: 2px; top: .45em; width: 13px; height: 13px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 21C3 10 10 3 21 3c0 11-7 18-18 18z' fill='%235DB865'/%3E%3Cpath d='M5 19 16 8' stroke='%23E6F6D9' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.how-photo { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 10px 12px; border-radius: 12px; background: #EEF8E4; color: var(--forest); font-size: .9375rem; line-height: 1.6; letter-spacing: -.02em; }
+.how-photo b { flex: none; font-weight: 400; font-family: var(--font-title); padding: 0 9px; border-radius: 999px; background: var(--forest); color: var(--white); font-size: .8125rem; line-height: 1.75; letter-spacing: 0; }
 .mission-rule { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--band); color: var(--forest); font-size: .9375rem; }
 .mission-rule.team { background: #FFF4C2; color: #5B4200; }
 .mission-rule b { flex: none; font-weight: 400; font-family: var(--font-title); padding: 0 9px; border-radius: 999px; background: var(--forest); color: var(--white); font-size: .8125rem; line-height: 1.6; }
@@ -233,7 +241,11 @@ button.cell:active { transform: scale(.96); }
 
 /* 도장 자리와 도장 */
 .slot { position: relative; flex: none; width: 43%; }
-.slot-empty { width: 100%; height: auto; mix-blend-mode: multiply; animation: breathe 3s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -.4s); }
+.slot-empty { display: block; width: 100%; height: auto; overflow: visible; animation: breathe 3s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -.4s); }
+.slot-empty .se-ring { fill: #F8FBF2; stroke: #3F8D4C; stroke-width: 2.6; stroke-dasharray: 7.2 4.6; stroke-linecap: round; }
+.slot-empty .se-leaf { fill: #4F9E52; }
+.slot-empty .se-vein { fill: none; stroke: #DDF2CF; stroke-width: 1.3; stroke-linecap: round; }
+.slot-empty text { font-family: var(--font-title); fill: #1E4A2C; text-anchor: middle; }
 @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 .stamp { position: absolute; left: -9%; top: -11%; width: 118%; height: 118%; opacity: 0; transform: rotate(-10deg) scale(.5); pointer-events: none; filter: drop-shadow(0 2px 2px rgba(20, 60, 30, .35)); }
 .stamp .st-disc { fill: #1F7A3E; }
@@ -463,6 +475,12 @@ button.cell:active { transform: scale(.96); }
     <div class="big" id="d-cell"></div>
     <p class="mission-rule" id="d-rule"></p>
 
+    <section class="box">
+      <h3 class="tab">수행 방법</h3>
+      <ul class="how" id="d-how"></ul>
+      <p class="how-photo"><b>인증 사진</b><span id="d-photo"></span></p>
+    </section>
+
     <section class="box" id="form-panel">
       <h3 class="tab">인증 올리기</h3>
       <form class="form" id="proof-form" novalidate>
@@ -549,6 +567,40 @@ button.cell:active { transform: scale(.96); }
     { n: 8, name: "공용 손수건·행주 활용", goal: 3, eg: "예) 휴지 대신 탕비실의 공용 손수건과 행주를 썼어요." },
     { n: 9, name: "점심 플로깅(줍깅)", goal: 1, team: true, eg: "예) 팀이 함께 점심시간에 건물 주변을 걸으며 쓰레기를 주웠어요." }
   ];
+  /* 미션 칸을 눌렀을 때 보여 주는 수행 방법(steps)과 인증 사진 안내(photo). */
+  const HOWTO = {
+    1: { steps: ["정한 날 하루, 팀원 모두가 일회용 컵 대신 개인 텀블러나 머그컵을 사용해요.",
+                 "팀원 중 한 명이 팀을 대표해 인증을 올려요."],
+         photo: "팀원 모두의 텀블러가 함께 보이는 사진 (단체 사진이나 텀블러를 모아 찍은 사진)" },
+    2: { steps: ["한 면만 쓴 종이는 버리지 말고 이면지 재활용함에 모아요.",
+                 "메모, 초안 출력, 연습장이 필요할 때 새 종이 대신 이면지함의 종이를 꺼내 써요.",
+                 "개인정보나 대외비 문서는 이면지함에 넣지 말고 파쇄해요."],
+         photo: "이면지를 넣거나 꺼내 쓰는 모습, 또는 이면지에 쓴 메모" },
+    3: { steps: ["집이나 사무실에서 다 쓴 건전지를 일반 쓰레기로 버리지 않고 폐건전지 수거함에 넣어요.",
+                 "부풀거나 손상된 배터리는 수거함에 넣지 말고 담당자에게 알려 주세요."],
+         photo: "수거함에 건전지를 넣는 모습" },
+    4: { steps: ["일회용 컵, 수저, 용기 대신 공용 비품함의 다회용품을 사용해요.",
+                 "쓴 비품은 깨끗이 씻어서 제자리에 돌려놓아요."],
+         photo: "다회용품을 사용하는 모습, 또는 씻어서 돌려놓은 모습" },
+    5: { steps: ["팀이 함께 공용 냉장고 속 음식에 이름표(이름, 넣은 날짜)를 붙여요.",
+                 "유통기한이 지났거나 주인이 없는 음식은 미리 알린 뒤 정리해요.",
+                 "팀원 중 한 명이 팀을 대표해 인증을 올려요."],
+         photo: "정리한 냉장고 안 모습, 또는 이름표를 붙인 모습" },
+    6: { steps: ["회의 때 종이컵, 생수병, 일회용 포장 다과 없이 개인 텀블러나 다회용 컵을 사용해요.",
+                 "회의 자료는 되도록 화면으로 함께 보고 출력을 줄여요.",
+                 "회의 참석자 중 한 명이 팀을 대표해 인증을 올려요."],
+         photo: "회의 테이블 위에 텀블러나 다회용 컵이 보이는 모습" },
+    7: { steps: ["점심시간에 자리를 비울 때 모니터, 개인 조명, 전열 기기를 꺼요.",
+                 "멀티탭 스위치까지 끄면 대기전력도 줄일 수 있어요. 업무용 PC는 상황에 맞게 절전 모드를 써요."],
+         photo: "꺼진 모니터나 꺼진 멀티탭 스위치" },
+    8: { steps: ["휴지나 물티슈 대신 탕비실의 공용 손수건이나 행주를 써요.",
+                 "쓴 뒤에는 빨거나 정해진 곳에 걸어 말려서 다음 사람도 쓸 수 있게 해요."],
+         photo: "행주로 테이블을 닦거나 손수건을 쓰는 모습" },
+    9: { steps: ["점심시간에 팀이 함께 건물 주변을 걸으며 쓰레기를 주워요.",
+                 "장갑과 봉투를 챙기고, 주운 쓰레기는 분리해서 배출해요.",
+                 "팀원 중 한 명이 팀을 대표해 인증을 올려요."],
+         photo: "함께 걷는 모습, 또는 모은 쓰레기봉투" }
+  };
   const LINES = [
     { cells: [1, 2, 3], label: "가로 첫째 줄" }, { cells: [4, 5, 6], label: "가로 둘째 줄" }, { cells: [7, 8, 9], label: "가로 셋째 줄" },
     { cells: [1, 4, 7], label: "세로 첫째 줄" }, { cells: [2, 5, 8], label: "세로 둘째 줄" }, { cells: [3, 6, 9], label: "세로 셋째 줄" },
@@ -559,6 +611,14 @@ button.cell:active { transform: scale(.96); }
       '<circle class="st-disc" cx="50" cy="50" r="47"/><circle class="st-edge" cx="50" cy="50" r="47"/><circle class="st-ring" cx="50" cy="50" r="40.5"/>' +
       '<path class="st-leaf" d="M42 33c-1-9 7-14 17-13c1 10-5 17-13 16c-1.600 0-3-1-4-3z"/>' +
       '<text x="50" y="58" font-size="16.5">그린품질</text><text x="50" y="78" font-size="20">도장</text>' +
+    '</svg>';
+  /* 빈 도장 자리: 초록 점선 원 + 잎 + '그린품질인증' */
+  const SLOT_HTML =
+    '<svg class="slot-empty" viewBox="0 0 100 100" aria-hidden="true">' +
+      '<circle class="se-ring" cx="50" cy="50" r="46"/>' +
+      '<path class="se-leaf" d="M38 36c0-11 9-17 22-17c0 12-8 19-18 19c-1.600 0-3-.7-4-2z"/>' +
+      '<path class="se-vein" d="M40.500 35.500 55 24"/>' +
+      '<text x="50" y="62" font-size="16.5">그린품질</text><text x="50" y="81" font-size="16.5">인증</text>' +
     '</svg>';
   const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -683,7 +743,7 @@ button.cell:active { transform: scale(.96); }
     const mid = document.createElement("span"); mid.className = "cell-mid";
     const art = document.createElement("img"); art.className = "art"; art.src = "img/art-" + m.n + ".webp"; art.alt = "";
     const slot = document.createElement("span"); slot.className = "slot";
-    slot.innerHTML = '<img class="slot-empty" src="img/slot.webp" alt="">' + STAMP_HTML;
+    slot.innerHTML = SLOT_HTML + STAMP_HTML;
     mid.append(art, slot);
     const band = document.createElement("span"); band.className = "band";
     band.innerHTML = '<span class="band-fill"></span><span class="band-text"></span>';
@@ -1021,6 +1081,9 @@ button.cell:active { transform: scale(.96); }
     rule.replaceChildren(tagEl, document.createTextNode(m.team
       ? "팀원 중 한 명이 팀을 대표해 " + m.goal + "회 인증하면 달성! 달성하면 참가자 모두 " + TEAM_POINTS + "점을 받아요."
       : "직접 실천한 사람이 올려요. 인증 1건마다 올린 사람에게 " + INDIV_POINTS + "점! " + m.goal + "회 인증하면 도장이 찍혀요."));
+    const how = HOWTO[m.n];
+    $("d-how").replaceChildren(...how.steps.map((s) => { const li = document.createElement("li"); li.textContent = s; return li; }));
+    $("d-photo").textContent = how.photo;
     $("f-note").placeholder = m.eg;
     const tag = document.createElement("span"); tag.className = "who-tag"; tag.textContent = p.label;
     $("f-who").replaceChildren(tag, document.createTextNode(p.name));
