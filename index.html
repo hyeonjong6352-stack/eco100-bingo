@@ -403,7 +403,7 @@ button.cell:active { transform: scale(.96); }
         </section>
         <p class="notice" id="pick-notice" hidden></p>
         <ol class="people" id="people" aria-label="참가자 9명"></ol>
-        <p class="pick-hint">도장판은 팀 전체가 함께 채우고, 점수는 개인별로 쌓여요. 내 이름을 고르면 내가 올린 인증에 이름이 표시됩니다. 이 기기에서는 다음부터 바로 도장판이 열려요.</p>
+        <p class="pick-hint">도장판은 팀 전체가 함께 채우고, 점수는 개인별로 쌓여요. 내 이름을 고르면 내가 올린 인증에 이름이 표시됩니다. 이 기기에서 전에 고른 이름은 초록 테두리로 표시돼요.</p>
       </div>
     </div>
     <div class="foot-zone solo">
@@ -1007,7 +1007,7 @@ button.cell:active { transform: scale(.96); }
     else { history.replaceState(null, "", urlFor(hash)); route(); }
   }
   const openMission = (n) => go("#m" + n);
-  const closeMission = () => goBack("");
+  const closeMission = () => goBack("#board");
 
   /* 참가자를 아직 안 골랐으면 어느 주소로 들어와도 먼저 고르기 화면을 보여 주고, 고른 뒤 원래 가려던 화면으로 보낸다. */
   let shown = null, after = "";
@@ -1032,7 +1032,7 @@ button.cell:active { transform: scale(.96); }
     try { localStorage.setItem("eco100-person", id); } catch (e) {}
     renderPick();
     if (history.state && history.state.inApp) history.back();
-    else { history.replaceState(null, "", urlFor(after)); after = ""; route(); }
+    else { history.replaceState(null, "", urlFor(after || "#board")); after = ""; route(); }
   }
   function showView(name) {
     $("hero").hidden = name === "detail";
@@ -1396,8 +1396,10 @@ button.cell:active { transform: scale(.96); }
   window.addEventListener("popstate", route);
   window.addEventListener("hashchange", route);
 
-  /* 이 기기에서 전에 고른 참가자가 있으면 바로 도장판을 연다. */
+  /* 주소만으로(QR·링크) 들어오면 항상 명단 고르기부터 보여 준다. 전에 고른 이름은 초록 테두리로 표시된다.
+     도장판은 #board, 미션은 #m3 주소라서 그 화면에서 새로 고침하면 그대로 머문다. */
   state.me = remembered();
+  if (!location.hash) history.replaceState(null, "", urlFor("#pick"));
   route();
   connect();
 })();
