@@ -21,6 +21,10 @@ create table if not exists public.entries (
   check (photo_path = uid::text || '/' || id::text || '.jpg')
 );
 
+-- 사진 여러 장(최대 10장): 둘째 장부터는 <uid>/<id>-2.jpg, -3.jpg … 로 저장하고 장수만 기록한다.
+alter table public.entries
+  add column if not exists photo_count int not null default 1 check (photo_count between 1 and 10);
+
 alter table public.entries enable row level security;
 grant select, insert, delete on public.entries to authenticated;
 

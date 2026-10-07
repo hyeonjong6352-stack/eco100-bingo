@@ -354,7 +354,24 @@ button.cell:active { transform: scale(.96); }
 /* ── 사진 크게 보기 · 알림 · 잎 꽃가루 ── */
 .lightbox { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--scrim); animation: view-in .25s ease both; }
 .lightbox img { max-width: 100%; max-height: calc(100vh - 110px); border-radius: 12px; }
-.lightbox button { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--paper); color: var(--ink); font-family: var(--font-title); }
+.lightbox .lb-close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--paper); color: var(--ink); font-family: var(--font-title); }
+.lb-nav { position: absolute; top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: rgba(251, 253, 246, .9); color: var(--ink); box-shadow: 0 2px 8px rgba(0, 0, 0, .3); }
+.lb-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.lb-prev { left: 10px; }
+.lb-next { right: 10px; }
+.lb-count { position: absolute; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; padding: 4px 14px; border-radius: 999px; background: rgba(251, 253, 246, .9); color: var(--ink); font-family: var(--font-title); font-variant-numeric: tabular-nums; }
+
+/* 고른 사진들: 작은 미리보기 + 빼기 버튼, 마지막 칸은 '사진 추가' */
+.label-note { font-family: var(--font-body); font-size: .8125rem; color: var(--muted); margin-left: 4px; }
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.shots li { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--band); animation: title-pop .35s cubic-bezier(.2, 1.3, .4, 1) both; }
+.shots img { width: 100%; height: 100%; object-fit: cover; }
+.shot-del { position: absolute; top: 5px; right: 5px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: rgba(27, 37, 64, .72); color: var(--white); font-size: 18px; line-height: 1; }
+.shot-no { position: absolute; left: 6px; bottom: 6px; padding: 0 7px; border-radius: 999px; background: rgba(27, 37, 64, .66); color: var(--white); font-family: var(--font-title); font-size: .75rem; line-height: 1.6; }
+.shot-add { display: grid; place-items: center; align-content: center; gap: 2px; width: 100%; height: 100%; border: 2px dashed #7FBF7A; border-radius: 12px; background: #EEF8E4; color: var(--forest); font-family: var(--font-title); font-size: .875rem; cursor: pointer; }
+.shot-add b { font-weight: 400; font-size: 1.6rem; line-height: 1; }
+.thumb { position: relative; }
+.thumb-count { position: absolute; right: 4px; bottom: 4px; padding: 0 6px; border-radius: 999px; background: rgba(27, 37, 64, .72); color: var(--white); font-family: var(--font-title); font-size: .75rem; line-height: 1.6; }
 .toast {
   position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 60; translate: -50% 0;
   max-width: calc(100% - 32px); padding: 10px 20px; border-radius: 999px; background: var(--forest); color: var(--white);
@@ -482,12 +499,12 @@ button.cell:active { transform: scale(.96); }
       <h3 class="tab">인증 올리기</h3>
       <form class="form" id="proof-form" novalidate>
         <div class="field">
-          <span class="label" id="l-photo">사진</span>
-          <input class="sr-file" type="file" id="f-photo" accept="image/*" aria-labelledby="l-photo">
+          <span class="label" id="l-photo">사진 <small class="label-note" id="l-photo-count">최대 10장</small></span>
+          <input class="sr-file" type="file" id="f-photo" accept="image/*" multiple aria-labelledby="l-photo">
           <label class="pick" id="pick" for="f-photo">
-            <span id="pick-empty"><strong>사진 고르기</strong><br>찍어 둔 사진을 고르거나 바로 촬영하세요</span>
-            <img id="pick-preview" alt="고른 사진 미리보기" hidden>
+            <span><strong>사진 고르기</strong><br>찍어 둔 사진을 고르거나 바로 촬영하세요<br>한 장도, 여러 장도 괜찮아요</span>
           </label>
+          <ul class="shots" id="shots" aria-label="고른 사진" hidden></ul>
         </div>
         <div class="field">
           <label for="f-note">실천 내용</label>
@@ -527,8 +544,11 @@ button.cell:active { transform: scale(.96); }
 </div>
 
 <div class="lightbox" id="lightbox" hidden>
-  <button type="button" id="lightbox-close">닫기</button>
+  <button type="button" class="lb-close" id="lightbox-close">닫기</button>
   <img id="lightbox-img" alt="인증 사진">
+  <button type="button" class="lb-nav lb-prev" id="lb-prev" aria-label="이전 사진" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+  <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="다음 사진" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+  <p class="lb-count" id="lb-count" aria-live="polite" hidden></p>
 </div>
 <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
 <canvas id="fx" aria-hidden="true"></canvas>
@@ -615,7 +635,7 @@ button.cell:active { transform: scale(.96); }
   const state = {
     entries: [], loaded: false, api: null, available: null, uid: null,
     me: null, current: null, prevDone: null, prevLines: null, fresh: new Set(), freshLines: new Set(),
-    busy: false, file: null, previewUrl: null
+    busy: false, files: []   /* files: 고른 사진들 [{ file, url }] (url은 미리보기용) */
   };
 
   /* ---------- 계산 ---------- */
@@ -959,6 +979,11 @@ button.cell:active { transform: scale(.96); }
     const tb = document.createElement("button"); tb.type = "button"; tb.className = "thumb";
     tb.setAttribute("aria-label", "사진 크게 보기");
     if (e.thumb) { const img = document.createElement("img"); img.src = e.thumb; img.alt = ""; img.loading = "lazy"; tb.append(img); }
+    if (e.photos.length > 1) {
+      const cnt = document.createElement("span"); cnt.className = "thumb-count"; cnt.textContent = e.photos.length + "장";
+      tb.append(cnt);
+      tb.setAttribute("aria-label", "사진 " + e.photos.length + "장 크게 보기");
+    }
     tb.addEventListener("click", () => openPhoto(e));
 
     const body = document.createElement("div"); body.className = "entry-body";
@@ -1140,28 +1165,81 @@ button.cell:active { transform: scale(.96); }
     throw new Error("too_large");
   }
 
+  /* 사진 크게 보기: 여러 장이면 좌우 버튼·화살표 키·밀기로 넘긴다. */
+  const lb = { urls: [], i: 0 };
   function openPhoto(e) {
-    $("lightbox-img").src = e.photo || e.thumb || "";
+    lb.urls = e.photos.length ? e.photos : [e.thumb].filter(Boolean);
+    lb.i = 0;
+    showLb();
     $("lightbox").hidden = false;
     $("lightbox-close").focus();
   }
+  function showLb() {
+    const many = lb.urls.length > 1;
+    $("lightbox-img").src = lb.urls[lb.i] || "";
+    $("lb-prev").hidden = !many; $("lb-next").hidden = !many; $("lb-count").hidden = !many;
+    $("lb-count").textContent = (lb.i + 1) + " / " + lb.urls.length;
+  }
+  function stepLb(d) {
+    if (lb.urls.length < 2) return;
+    lb.i = (lb.i + d + lb.urls.length) % lb.urls.length;
+    showLb();
+  }
   function closePhoto() { $("lightbox").hidden = true; $("lightbox-img").removeAttribute("src"); }
+
+  /* ---------- 사진 고르기 (여러 장) ---------- */
+  const MAX_PHOTOS = 10;
+  function addFiles(list) {
+    const room = MAX_PHOTOS - state.files.length;
+    const picked = [...list].filter((f) => !f.type || f.type.startsWith("image/"));
+    picked.slice(0, room).forEach((file) => state.files.push({ file, url: URL.createObjectURL(file) }));
+    showError(picked.length > room ? "사진은 한 번에 최대 " + MAX_PHOTOS + "장까지 올릴 수 있어요." : "");
+    renderShots();
+  }
+  function removeFile(k) {
+    const [gone] = state.files.splice(k, 1);
+    if (gone) URL.revokeObjectURL(gone.url);
+    renderShots();
+  }
+  function renderShots() {
+    const n = state.files.length;
+    $("pick").hidden = n > 0;
+    $("shots").hidden = n === 0;
+    $("l-photo-count").textContent = n ? n + "장 · 최대 " + MAX_PHOTOS + "장" : "최대 " + MAX_PHOTOS + "장";
+    const items = state.files.map((f, k) => {
+      const li = document.createElement("li");
+      const img = document.createElement("img"); img.src = f.url; img.alt = "고른 사진 " + (k + 1);
+      const no = document.createElement("span"); no.className = "shot-no"; no.textContent = k + 1;
+      const del = document.createElement("button"); del.type = "button"; del.className = "shot-del";
+      del.setAttribute("aria-label", (k + 1) + "번째 사진 빼기"); del.textContent = "×";
+      del.addEventListener("click", () => removeFile(k));
+      li.append(img, no, del);
+      return li;
+    });
+    if (n && n < MAX_PHOTOS) {
+      const li = document.createElement("li");
+      const add = document.createElement("label"); add.className = "shot-add"; add.htmlFor = "f-photo";
+      add.innerHTML = "<b>+</b>사진 추가";
+      li.append(add); items.push(li);
+    }
+    $("shots").replaceChildren(...items);
+  }
 
   /* ---------- 올리기 · 삭제 ---------- */
   function writeFailed(err) {
     const code = String((err && (err.code || err.statusCode)) || "");
     if (code === "42501" || code === "403") return "인증을 저장할 권한이 없습니다. 페이지를 새로 고친 뒤 다시 시도해주세요.";
     if (code === "413") return "사진이 너무 큽니다. 다른 사진으로 다시 골라주세요.";
+    if (code === "PGRST204") return "여러 장 올리기 설정이 아직 안 되어 있어요. 사진을 한 장만 올리거나 관리자에게 알려주세요.";
     return "인증을 올리지 못했습니다. 연결 상태를 확인하고 다시 시도해주세요.";
   }
   function showError(msg) { const p = $("f-error"); p.textContent = msg || ""; p.hidden = !msg; }
 
   function resetForm() {
-    state.file = null;
-    if (state.previewUrl) { URL.revokeObjectURL(state.previewUrl); state.previewUrl = null; }
+    state.files.forEach((f) => URL.revokeObjectURL(f.url));
+    state.files = [];
     $("f-photo").value = "";
-    $("pick-preview").hidden = true; $("pick-preview").removeAttribute("src");
-    $("pick-empty").hidden = false; $("pick").classList.remove("has-photo");
+    renderShots();
     $("f-note").value = "";
     $("f-date").value = todayStr();
     $("f-date").max = todayStr();
@@ -1174,7 +1252,7 @@ button.cell:active { transform: scale(.96); }
     if (teamClosed(state.current)) { renderAccess(); return; }
     const note = $("f-note").value.trim();
     const date = $("f-date").value;
-    if (!state.file) return showError("사진을 골라주세요.");
+    if (!state.files.length) return showError("사진을 한 장 이상 골라주세요.");
     if (!note) return showError("실천 내용을 적어주세요.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return showError("실천한 날을 골라주세요.");
 
@@ -1183,21 +1261,29 @@ button.cell:active { transform: scale(.96); }
     state.busy = true; btn.disabled = true; btn.textContent = "올리는 중";
     showError("");
     try {
-      let full, thumb;
-      try {
-        const { img, url } = await loadImage(state.file);
-        try { full = await encodePhoto(img); thumb = drawScaled(img, 240).toDataURL("image/jpeg", .6); }
-        finally { URL.revokeObjectURL(url); }
-      } catch (e) {
-        showError("이 사진은 읽을 수 없습니다. JPG나 PNG 사진으로 다시 골라주세요.");
-        return;
+      /* 사진을 한 장씩 줄인다. 목록의 첫 사진으로 작은 미리보기(thumb)를 만든다. */
+      const fulls = [];
+      let thumb = "";
+      for (let k = 0; k < state.files.length; k++) {
+        btn.textContent = state.files.length > 1 ? "사진 준비 중 (" + (k + 1) + "/" + state.files.length + ")" : "올리는 중";
+        try {
+          const { img, url } = await loadImage(state.files[k].file);
+          try {
+            fulls.push(await encodePhoto(img));
+            if (!k) thumb = drawScaled(img, 240).toDataURL("image/jpeg", .6);
+          } finally { URL.revokeObjectURL(url); }
+        } catch (e) {
+          showError((k + 1) + "번째 사진은 읽을 수 없습니다. 그 사진을 빼거나 JPG·PNG 사진으로 다시 골라주세요.");
+          return;
+        }
       }
+      btn.textContent = "올리는 중";
 
       const before = doneOf(countsOf(state.entries));
       const linesBefore = linesOf(before).length;
       const id = newId();
       try {
-        await state.api.add({ id, who, mission, note, date, thumb, uid }, full);
+        await state.api.add({ id, who, mission, note, date, thumb, uid }, fulls);
       } catch (err) {
         showError(writeFailed(err));
         return;
@@ -1245,7 +1331,7 @@ button.cell:active { transform: scale(.96); }
       id: String(v.id), who: String(v.who || ""), mission: Number(v.mission), note: String(v.note || ""),
       date: String(v.date || ""), createdAt: Date.parse(v.created_at) || 0, uid: String(v.uid || ""),
       thumb: typeof v.thumb === "string" && v.thumb.startsWith("data:image/") ? v.thumb : "",
-      photo: v.photo_path && state.api ? state.api.photoUrl(v.photo_path) : ""
+      photos: v.photo_path && state.api ? photoPaths(v).map(state.api.photoUrl) : []
     })).filter((e) => PEOPLE_BY_ID.has(e.who) && Number.isInteger(e.mission) && e.mission >= 1 && e.mission <= 9);
 
     const first = !state.loaded;
@@ -1267,7 +1353,13 @@ button.cell:active { transform: scale(.96); }
   /* ---------- 저장소 (Supabase) ----------
      화면 코드는 state.api(photoUrl, add, remove)와 onEntries(rows)만 쓴다. 저장소를 바꾸려면 이 부분만 고치면 된다. */
   const NET_FAIL = "기록 저장소에 연결하지 못했습니다. 인터넷 연결을 확인하고 페이지를 새로 고쳐주세요.";
-  const COLS = "id,who,mission,note,date,created_at,uid,thumb,photo_path";
+  /* 사진 파일 이름: 첫 장은 <uid>/<id>.jpg, 둘째 장부터 <uid>/<id>-2.jpg, -3.jpg …
+     장수는 photo_count 칸에 둔다(없으면 1장). 읽을 때 *를 쓰는 것은 photo_count 칸이 없는 예전 표에서도 동작하게 하려는 것. */
+  const COLS = "*";
+  function photoPaths(row) {
+    const n = Math.max(1, Math.min(MAX_PHOTOS, Number(row.photo_count) || 1));
+    return Array.from({ length: n }, (_, k) => (k ? row.photo_path.replace(/\.jpg$/, "-" + (k + 1) + ".jpg") : row.photo_path));
+  }
   function fail(msg) { state.available = false; setNotice(msg); render(); }
   function newId() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -1314,20 +1406,32 @@ button.cell:active { transform: scale(.96); }
     }
     state.api = {
       photoUrl: (path) => bucket.getPublicUrl(path).data.publicUrl,
-      /* 사진 파일을 먼저 올리고 기록을 넣는다. 기록이 실패하면 올린 사진을 지운다. */
-      async add(entry, blob) {
-        const path = entry.uid + "/" + entry.id + ".jpg";
-        const up = await bucket.upload(path, blob, { contentType: "image/jpeg", upsert: false });
-        if (up.error) throw up.error;
-        const { data, error } = await sb.from("entries").insert({ ...entry, photo_path: path }).select(COLS).single();
-        if (error) { bucket.remove([path]).catch(() => {}); throw error; }
-        rows.set(data.id, data); publish();
+      /* 사진 파일을 모두 먼저 올리고 기록을 넣는다. 중간에 실패하면 이미 올린 사진을 지운다. */
+      async add(entry, blobs) {
+        const first = entry.uid + "/" + entry.id + ".jpg";
+        const paths = photoPaths({ photo_path: first, photo_count: blobs.length });
+        const done = [];
+        try {
+          for (let k = 0; k < blobs.length; k++) {
+            const up = await bucket.upload(paths[k], blobs[k], { contentType: "image/jpeg", upsert: false });
+            if (up.error) throw up.error;
+            done.push(paths[k]);
+          }
+          /* 한 장일 때는 photo_count를 보내지 않는다(그 칸이 없는 예전 표에서도 올라가도록). */
+          const row = { ...entry, photo_path: first, ...(blobs.length > 1 ? { photo_count: blobs.length } : {}) };
+          const { data, error } = await sb.from("entries").insert(row).select(COLS).single();
+          if (error) throw error;
+          rows.set(data.id, data); publish();
+        } catch (err) {
+          if (done.length) bucket.remove(done).catch(() => {});
+          throw err;
+        }
       },
       async remove(id) {
-        const { data, error } = await sb.from("entries").delete().eq("id", id).select("id,photo_path");
+        const { data, error } = await sb.from("entries").delete().eq("id", id).select(COLS);
         if (error) throw error;
         if (!data || !data.length) throw { code: "not_mine" };
-        bucket.remove(data.map((r) => r.photo_path)).catch(() => {});
+        bucket.remove(data.flatMap(photoPaths)).catch(() => {});
         rows.delete(id); publish();
       }
     };
@@ -1375,20 +1479,26 @@ button.cell:active { transform: scale(.96); }
   $("rank-toggle").addEventListener("click", toggleRank);
   $("rank-more").addEventListener("click", toggleRank);
   $("proof-form").addEventListener("submit", submitProof);
+  /* 고를 때마다 기존 사진 뒤에 덧붙인다. 같은 사진을 다시 고를 수 있게 입력값은 비운다. */
   $("f-photo").addEventListener("change", (ev) => {
-    const f = ev.target.files && ev.target.files[0];
-    if (!f) return;
-    state.file = f;
-    if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
-    state.previewUrl = URL.createObjectURL(f);
-    const pv = $("pick-preview");
-    pv.src = state.previewUrl; pv.hidden = false;
-    $("pick-empty").hidden = true; $("pick").classList.add("has-photo");
-    showError("");
+    const list = ev.target.files;
+    if (list && list.length) addFiles(list);
+    ev.target.value = "";
   });
   $("lightbox-close").addEventListener("click", closePhoto);
+  $("lb-prev").addEventListener("click", () => stepLb(-1));
+  $("lb-next").addEventListener("click", () => stepLb(1));
   $("lightbox").addEventListener("click", (ev) => { if (ev.target === ev.currentTarget) closePhoto(); });
+  let touchX = null;
+  $("lightbox").addEventListener("touchstart", (ev) => { touchX = ev.touches[0].clientX; }, { passive: true });
+  $("lightbox").addEventListener("touchend", (ev) => {
+    if (touchX === null) return;
+    const dx = ev.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) > 40) stepLb(dx < 0 ? 1 : -1);
+  });
   document.addEventListener("keydown", (ev) => {
+    if (!$("lightbox").hidden && (ev.key === "ArrowLeft" || ev.key === "ArrowRight")) return stepLb(ev.key === "ArrowLeft" ? -1 : 1);
     if (ev.key !== "Escape") return;
     if (!$("lightbox").hidden) closePhoto();
     else if (state.current) closeMission();

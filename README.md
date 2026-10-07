@@ -73,8 +73,9 @@ SQL Editor에서 제약을 바꿔야 한다(필요하면 요청할 것). 이름�
 
 ## 데이터 모양
 
-- 표 `public.entries`: `id uuid, who 'p1'~'p9', mission 1~9, note, date, thumb(작은 JPEG data URL), photo_path, uid, created_at`
-- Storage 버킷 `photos`: `<uid>/<id>.jpg` (1MB 이하 JPEG, 공개 읽기)
+- 표 `public.entries`: `id uuid, who 'p1'~'p9', mission 1~9, note, date, thumb(첫 사진의 작은 JPEG data URL), photo_path(첫 사진), photo_count(사진 장수, 1~10), uid, created_at`
+- Storage 버킷 `photos`: 첫 장 `<uid>/<id>.jpg`, 둘째 장부터 `<uid>/<id>-2.jpg`, `-3.jpg` … (장당 1MB 이하 JPEG, 공개 읽기)
+- 인증 1건에 사진을 1~10장 올릴 수 있다. 이미 운영 중인 프로젝트는 `supabase-add-photo-count.sql`을 한 번 실행해야 2장 이상이 올라간다.
 
 규칙(RLS): 누구나 읽기 · 자기 uid로만 올리기 · 올린 기기만 삭제 · 수정 불가.
 잘못 올라온 기록은 관리자가 대시보드 **Table Editor → entries**에서 행을 지우고, **Storage → photos**에서 같은 사진을 지운다.
