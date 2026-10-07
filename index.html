@@ -118,8 +118,9 @@ img { display: block; }
 .pick-hint { padding: 10px 8px 2px; font-size: .875rem; color: var(--muted); text-align: center; }
 
 /* ── 개인 랭킹 ── */
-/* 탭이 상자 위로 17px 튀어나와 있어서, 빙고판과 탭 사이에 눈에 보이는 간격이 약 30px 남도록 잡는다. */
-.rank-box { margin-top: 48px; }
+/* 탭이 상자 위로 17px 튀어나와 있어서, 빙고판과 탭 사이에 눈에 보이는 간격이 약 28px 남도록 잡는다.
+   뒤에 오는 .box { margin-top } 규칙에 덮이지 않게 .box.rank-box로 쓴다. */
+.box.rank-box { margin-top: 46px; }
 .tab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; }
 .tab-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s; }
 .tab-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
