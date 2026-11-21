@@ -312,6 +312,7 @@ button.cell:active { transform: scale(.96); }
 .entry-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; font-size: .8125rem; }
 .link-btn { padding: 4px 0; border: 0; background: none; color: var(--muted); text-decoration: underline; font-size: .8125rem; }
 .link-btn.danger { color: var(--coral); font-weight: 700; }
+.entry-edit { gap: 10px; margin-top: 6px; }
 
 .words { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; padding-inline: 16px; padding-block: 4px 34px; background: var(--paper-end); }
 .words li { display: flex; align-items: center; gap: 7px; font-size: .8125rem; letter-spacing: .12em; color: #1F4D3A; }
@@ -708,7 +709,8 @@ button.cell:active { transform: scale(.96); }
   const state = {
     entries: [], loaded: false, api: null, available: null, uid: null,
     me: null, current: null, prevDone: null, prevLines: null, fresh: new Set(), freshLines: new Set(),
-    busy: false, files: []   /* files: 고른 사진들 [{ file, url }] (url은 미리보기용) */
+    busy: false, files: [],  /* files: 고른 사진들 [{ file, url }] (url은 미리보기용) */
+    edit: null               /* edit: 고치는 중인 인증 { id, note, date, error, saving }. 목록을 다시 그려도 입력이 남도록 여기에 둔다. */
   };
 
   /* ---------- 계산 ---------- */
@@ -749,6 +751,10 @@ button.cell:active { transform: scale(.96); }
       .sort((a, b) => b.score - a.score || a.last - b.last || PEOPLE.findIndex((p) => p.id === a.who) - PEOPLE.findIndex((p) => p.id === b.who));
     list.forEach((r, i) => { r.rank = i && r.score === list[i - 1].score ? list[i - 1].rank : i + 1; });
     return list;
+  }
+  /* 올라온 인증 순서: 실천한 날이 최근인 것이 위. 같은 날이면 나중에 올린 것이 위. */
+  function byPracticeDate(a, b) {
+    return (b.date > a.date) - (b.date < a.date) || b.createdAt - a.createdAt;
   }
   function todayStr() {
     const d = new Date();
@@ -989,7 +995,7 @@ button.cell:active { transform: scale(.96); }
     renderRank();
 
     const feed = $("feed");
-    const latest = [...state.entries].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6);
+    const latest = [...state.entries].sort(byPracticeDate).slice(0, 6);
     feed.replaceChildren(...latest.map((e) => entryItem(e, { showMission: true })));
     $("feed-empty").hidden = latest.length > 0;
 
@@ -1115,14 +1121,26 @@ button.cell:active { transform: scale(.96); }
     const author = document.createElement("b"); author.className = "entry-who"; author.textContent = personText(e.who);
     const rest = [niceDate(e.date), state.uid && e.uid === state.uid ? "이 기기에서 올림" : ""].filter(Boolean);
     meta.append(author, document.createTextNode(rest.length ? " · " + rest.join(" · ") : ""));
+    if (opts.canDelete && state.edit && state.edit.id === e.id) {
+      body.append(meta, editForm(e));
+      li.append(tb, body);
+      return li;
+    }
     body.append(note, meta);
 
     if (opts.canDelete) {
       const tools = document.createElement("div"); tools.className = "entry-tools";
       const ask = () => {
+        const edit = document.createElement("button"); edit.type = "button"; edit.className = "link-btn"; edit.textContent = "수정";
+        edit.addEventListener("click", () => {
+          state.edit = { id: e.id, note: e.note, date: e.date, error: "", saving: false };
+          renderDetail(false);
+          const ta = document.getElementById("edit-note-" + e.id);
+          if (ta) ta.focus();
+        });
         const del = document.createElement("button"); del.type = "button"; del.className = "link-btn"; del.textContent = "삭제";
         del.addEventListener("click", confirmStep);
-        tools.replaceChildren(del);
+        tools.replaceChildren(edit, del);
       };
       const confirmStep = () => {
         const q = document.createElement("span"); q.textContent = "이 인증을 삭제할까요?";
@@ -1136,6 +1154,57 @@ button.cell:active { transform: scale(.96); }
     }
     li.append(tb, body);
     return li;
+  }
+
+  /* 인증 고치기: 실천 내용과 실천한 날만 고칠 수 있다(사진·미션·올린 사람은 그대로). */
+  function editForm(e) {
+    const ed = state.edit;
+    const form = document.createElement("form"); form.className = "form entry-edit"; form.noValidate = true;
+    const f1 = document.createElement("div"); f1.className = "field";
+    const l1 = document.createElement("label"); l1.htmlFor = "edit-note-" + e.id; l1.textContent = "실천 내용";
+    const ta = document.createElement("textarea"); ta.id = "edit-note-" + e.id; ta.maxLength = 300; ta.value = ed.note;
+    ta.addEventListener("input", () => { ed.note = ta.value; });
+    f1.append(l1, ta);
+    const f2 = document.createElement("div"); f2.className = "field";
+    const l2 = document.createElement("label"); l2.htmlFor = "edit-date-" + e.id; l2.textContent = "실천한 날";
+    const di = document.createElement("input"); di.type = "date"; di.id = "edit-date-" + e.id; di.max = todayStr(); di.value = ed.date;
+    di.addEventListener("input", () => { ed.date = di.value; });
+    di.addEventListener("change", () => { ed.date = di.value; });
+    f2.append(l2, di);
+    const err = document.createElement("p"); err.className = "error"; err.setAttribute("role", "alert");
+    err.textContent = ed.error; err.hidden = !ed.error;
+    const tools = document.createElement("div"); tools.className = "entry-tools";
+    const save = document.createElement("button"); save.type = "submit"; save.className = "link-btn danger";
+    save.textContent = ed.saving ? "저장 중" : "저장"; save.disabled = ed.saving;
+    const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "link-btn"; cancel.textContent = "취소";
+    cancel.disabled = ed.saving;
+    cancel.addEventListener("click", () => { state.edit = null; renderDetail(false); });
+    tools.append(save, cancel);
+    form.append(f1, f2, err, tools);
+    form.addEventListener("submit", (ev) => { ev.preventDefault(); saveEdit(e.id); });
+    return form;
+  }
+  async function saveEdit(id) {
+    const ed = state.edit;
+    if (!ed || ed.id !== id || ed.saving || !state.api || !writable()) return;
+    const note = ed.note.trim(), date = ed.date;
+    const bad = (msg) => { ed.error = msg; renderDetail(false); };
+    if (!note) return bad("실천 내용을 적어주세요.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return bad("실천한 날을 골라주세요.");
+    if (date > todayStr()) return bad("실천한 날은 오늘 이후로 고를 수 없어요.");
+    ed.saving = true; ed.error = ""; renderDetail(false);
+    try {
+      await state.api.update(id, { note, date });
+      if (state.edit && state.edit.id === id) state.edit = null;
+      renderDetail(false);
+      toast("인증을 수정했습니다.");
+    } catch (err) {
+      if (state.edit && state.edit.id === id) {
+        state.edit.saving = false;
+        state.edit.error = err && err.code === "gone" ? "이미 삭제된 인증입니다." : "수정하지 못했습니다. 연결 상태를 확인하고 다시 시도해주세요.";
+      }
+      renderDetail(false);
+    }
   }
 
   /* ---------- 화면 이동 ----------
@@ -1202,6 +1271,7 @@ button.cell:active { transform: scale(.96); }
   }
   function showMission(n) {
     state.current = n;
+    state.edit = null;
     const m = MISSIONS[n - 1], p = PEOPLE_BY_ID.get(state.me);
     const big = buildCell(m, "div"); big.id = "d-card";
     $("d-cell").replaceChildren(big);
@@ -1226,9 +1296,17 @@ button.cell:active { transform: scale(.96); }
   function renderDetail(animate) {
     if (!state.current) return;
     const m = MISSIONS[state.current - 1];
-    const mine = state.entries.filter((e) => e.mission === m.n).sort((a, b) => b.createdAt - a.createdAt);
+    const mine = state.entries.filter((e) => e.mission === m.n).sort(byPracticeDate);
     updateCell($("d-card"), m, mine.length, animate, true);
-    $("entries").replaceChildren(...mine.map((e) => entryItem(e, { canDelete: writable() && e.uid === state.uid })));
+    if (state.edit && !mine.some((e) => e.id === state.edit.id)) state.edit = null;
+    /* 고치는 도중에 다른 사람의 인증이 들어와 목록을 다시 그려도 입력 칸의 포커스와 커서를 지킨다. */
+    const act = document.activeElement;
+    const keep = act && /^edit-(note|date)-/.test(act.id) ? { id: act.id, s: act.selectionStart, e: act.selectionEnd } : null;
+    $("entries").replaceChildren(...mine.map((e) => entryItem(e, { canDelete: writable() })));
+    if (keep) {
+      const el = document.getElementById(keep.id);
+      if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (x) {} }
+    }
     $("entries-empty").hidden = mine.length > 0;
     renderAccess();
   }
@@ -1429,7 +1507,7 @@ button.cell:active { transform: scale(.96); }
       await state.api.remove(id);
       toast("인증을 삭제했습니다.");
     } catch (err) {
-      toast(err && err.code === "not_mine" ? "이 기기에서 올린 인증만 삭제할 수 있습니다." : "삭제하지 못했습니다. 다시 시도해주세요.");
+      toast(err && err.code === "not_mine" ? "이미 삭제된 인증입니다." : "삭제하지 못했습니다. 다시 시도해주세요.");
       renderDetail(false);
     }
   }
@@ -1502,7 +1580,7 @@ button.cell:active { transform: scale(.96); }
     } catch (e) {
       return fail(NET_FAIL);
     }
-    /* 익명 로그인: 사용자에게는 아무것도 묻지 않는다. 기기마다 고정 uid가 생겨 '내가 올린 인증만 삭제'를 지킨다. */
+    /* 익명 로그인: 사용자에게는 아무것도 묻지 않는다. 기기마다 고정 uid가 생긴다(올린 기기 표시와 사진 폴더에 쓴다). */
     try {
       const { data: s } = await sb.auth.getSession();
       let user = s && s.session ? s.session.user : null;
@@ -1550,6 +1628,13 @@ button.cell:active { transform: scale(.96); }
           throw err;
         }
       },
+      /* 실천 내용(note)과 실천한 날(date)만 고친다. */
+      async update(id, fields) {
+        const { data, error } = await sb.from("entries").update({ note: fields.note, date: fields.date }).eq("id", id).select(COLS);
+        if (error) throw error;
+        if (!data || !data.length) throw { code: "gone" };
+        rows.set(data[0].id, data[0]); publish();
+      },
       async remove(id) {
         const { data, error } = await sb.from("entries").delete().eq("id", id).select(COLS);
         if (error) throw error;
@@ -1571,7 +1656,7 @@ button.cell:active { transform: scale(.96); }
     let live = false;
     sb.channel("entries")
       .on("postgres_changes", { event: "*", schema: "public", table: "entries" }, (ev) => {
-        if (ev.eventType === "INSERT" && ev.new) rows.set(ev.new.id, ev.new);
+        if ((ev.eventType === "INSERT" || ev.eventType === "UPDATE") && ev.new) rows.set(ev.new.id, ev.new);
         else if (ev.eventType === "DELETE" && ev.old) rows.delete(ev.old.id);
         else return;
         publish();
